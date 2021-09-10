@@ -6,35 +6,35 @@ pragma experimental ABIEncoderV2;
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
 import "../libraries/UniswapV2Library.sol";
-import "@sushiswap/core/contracts/uniswapv2/libraries/TransferHelper.sol";
-import "@sushiswap/bentobox-sdk/contracts/IBentoBoxV1.sol";
+import "@polycity/core/contracts/uniswapv2/libraries/TransferHelper.sol";
+import "@polycity/antiquebox-sdk/contracts/IAntiqueBoxV1.sol";
 
-contract SushiSwapMultiSwapper {
+contract PolyCityDexMultiSwapper {
     using BoringERC20 for IERC20;
     using BoringMath for uint256;
 
     address private immutable factory;
 
-    IBentoBoxV1 private immutable bentoBox;
+    IAntiqueBoxV1 private immutable antiqueBox;
 
     bytes32 private immutable pairCodeHash;
 
-    constructor (address _factory, IBentoBoxV1 _bentoBox, bytes32 _pairCodeHash) public {
+    constructor (address _factory, IAntiqueBoxV1 _antiqueBox, bytes32 _pairCodeHash) public {
         factory = _factory;
-        bentoBox = _bentoBox;
+        antiqueBox = _antiqueBox;
         pairCodeHash = _pairCodeHash;
     }
 
     function getOutputAmount (IERC20 tokenIn, IERC20 tokenOut, uint256 amountMinOut, address[] calldata path, uint256 shareIn) external view returns (uint256 amountOut){
-        uint256 amountIn = bentoBox.toAmount(tokenIn, shareIn, false);
+        uint256 amountIn = antiqueBox.toAmount(tokenIn, shareIn, false);
         uint256[] memory amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path, pairCodeHash);
         amountOut = amounts[amounts.length - 1];
     }
 
     function swap (IERC20 tokenIn, IERC20 tokenOut, uint256 amountMinOut, address[] calldata path, uint256 shareIn) external returns (uint256 amountOut, uint256 shareOut) {
-        (uint256 amountIn, ) = bentoBox.withdraw(tokenIn, address(this), address(this), 0, shareIn);
-        amountOut = _swapExactTokensForTokens(amountIn, amountMinOut, path, address(bentoBox));
-        (, shareOut) = bentoBox.deposit(tokenOut, address(bentoBox), msg.sender, amountOut, 0);
+        (uint256 amountIn, ) = antiqueBox.withdraw(tokenIn, address(this), address(this), 0, shareIn);
+        amountOut = _swapExactTokensForTokens(amountIn, amountMinOut, path, address(antiqueBox));
+        (, shareOut) = antiqueBox.deposit(tokenOut, address(antiqueBox), msg.sender, amountOut, 0);
     }
 
     // Swaps an exact amount of tokens for another token through the path passed as an argument

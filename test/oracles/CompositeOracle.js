@@ -1,39 +1,39 @@
 const { ethers } = require("hardhat")
 const { expect } = require("chai")
-const { getBigNumber, roundBN, advanceTime, createFixture } = require("@sushiswap/hardhat-framework")
+const { getBigNumber, roundBN, advanceTime, createFixture } = require("@polycity/hardhat-framework")
 
 describe("CompositeOracle", function () {
     before(async function () {
-        this.sushiAmount = getBigNumber(400)
+        this.pichiAmount = getBigNumber(400)
         this.ethAmount = getBigNumber(1)
         this.daiAmount = getBigNumber(500)
 
         fixture = await createFixture(deployments, this, async (cmd) => {
             await cmd.deploy("weth9", "WETH9Mock")
-            await cmd.deploy("sushiToken", "ReturnFalseERC20Mock", "SUSHI", "SUSHI", 18, getBigNumber("10000000"))
+            await cmd.deploy("pichiToken", "ReturnFalseERC20Mock", "PICHI", "PICHI", 18, getBigNumber("10000000"))
             await cmd.deploy("ethToken", "ReturnFalseERC20Mock", "WETH", "ETH", 18, getBigNumber("10000000"))
             await cmd.deploy("daiToken", "ReturnFalseERC20Mock", "DAI", "DAI", 18, getBigNumber("10000000"))
             await cmd.deploy("factory", "UniswapV2Factory", this.alice.address)
-            await cmd.deploy("bentoBox", "BentoBoxMock", this.weth9.address)
+            await cmd.deploy("antiqueBox", "AntiqueBoxMock", this.weth9.address)
 
-            let createPairTx = await this.factory.createPair(this.sushiToken.address, this.ethToken.address)
+            let createPairTx = await this.factory.createPair(this.pichiToken.address, this.ethToken.address)
 
-            const pairSushiEth = (await createPairTx.wait()).events[0].args.pair
+            const pairPichiEth = (await createPairTx.wait()).events[0].args.pair
 
             await cmd.getContract("UniswapV2Pair")
-            this.pairSushiEth = await this.UniswapV2Pair.attach(pairSushiEth)
+            this.pairPichiEth = await this.UniswapV2Pair.attach(pairPichiEth)
 
-            await this.sushiToken.transfer(this.pairSushiEth.address, this.sushiAmount)
-            await this.ethToken.transfer(this.pairSushiEth.address, this.ethAmount)
+            await this.pichiToken.transfer(this.pairPichiEth.address, this.pichiAmount)
+            await this.ethToken.transfer(this.pairPichiEth.address, this.ethAmount)
 
-            await this.pairSushiEth.mint(this.alice.address)
+            await this.pairPichiEth.mint(this.alice.address)
 
-            if (this.ethToken.address == (await this.pairSushiEth.token0())) {
-                await cmd.deploy("oracleSushiEth", "SimpleSLPTWAP0Oracle")
+            if (this.ethToken.address == (await this.pairPichiEth.token0())) {
+                await cmd.deploy("oraclePichiEth", "SimpleSLPTWAP0Oracle")
             } else {
-                await cmd.deploy("oracleSushiEth", "SimpleSLPTWAP1Oracle")
+                await cmd.deploy("oraclePichiEth", "SimpleSLPTWAP1Oracle")
             }
-            this.oracleDataA = await this.oracleSushiEth.getDataParameter(this.pairSushiEth.address)
+            this.oracleDataA = await this.oraclePichiEth.getDataParameter(this.pairPichiEth.address)
 
             createPairTx = await this.factory.createPair(this.ethToken.address, this.daiToken.address)
 
@@ -55,7 +55,7 @@ describe("CompositeOracle", function () {
             await cmd.deploy("compositeOracle", "CompositeOracle")
 
             this.compositeOracleData = await this.compositeOracle.getDataParameter(
-                this.oracleSushiEth.address,
+                this.oraclePichiEth.address,
                 this.oracleDaiEth.address,
                 this.oracleDataA,
                 this.oracleDataB
@@ -92,13 +92,13 @@ describe("CompositeOracle", function () {
             let price0 = (await this.compositeOracle.peek(this.compositeOracleData))[1]
 
             //check expectations
-            const oldPrice = this.sushiAmount.mul(100).div(this.daiAmount)
+            const oldPrice = this.pichiAmount.mul(100).div(this.daiAmount)
             expect(roundBN(price0)).to.be.equal(oldPrice)
 
-            //half the sushi price
+            //half the pichi price
             await advanceTime(150, ethers)
-            await this.sushiToken.transfer(this.pairSushiEth.address, getBigNumber(400))
-            await this.pairSushiEth.sync()
+            await this.pichiToken.transfer(this.pairPichiEth.address, getBigNumber(400))
+            await this.pairPichiEth.sync()
             await advanceTime(150, ethers)
 
             // read exchange rate again half way
@@ -107,7 +107,7 @@ describe("CompositeOracle", function () {
 
             //check expectations
             // oracle returns "the amount of callateral unit to buy 10^18 of asset units"
-            // expectation: 1.2 of Sushi to buy 1 DAI
+            // expectation: 1.2 of Pichi to buy 1 DAI
             expect(roundBN(price1)).to.be.equal("120")
 
             //read exchange rate at final price
@@ -115,14 +115,14 @@ describe("CompositeOracle", function () {
             await this.compositeOracle.get(this.compositeOracleData)
             let price2 = (await this.compositeOracle.peek(this.compositeOracleData))[1]
             // oracle returns "the amount of callateral unit to buy 10^18 of asset units"
-            // expectation: 1.6 of Sushi to buy 1 DAI
+            // expectation: 1.6 of Pichi to buy 1 DAI
 
             expect(roundBN(price2)).to.be.equal("160")
         })
     })
 
-    it("Assigns name SushiSwap TWAP+SushiSwap TWAP to Composite Oracle", async function () {
-        expect(await this.compositeOracle.name(this.compositeOracleData)).to.equal("SushiSwap TWAP+SushiSwap TWAP")
+    it("Assigns name PolyCityDex TWAP+PolyCityDex TWAP to Composite Oracle", async function () {
+        expect(await this.compositeOracle.name(this.compositeOracleData)).to.equal("PolyCityDex TWAP+PolyCityDex TWAP")
     })
 
     it("Assigns symbol S+S to Composite Oracle", async function () {

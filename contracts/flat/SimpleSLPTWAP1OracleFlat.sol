@@ -113,7 +113,7 @@ library BoringMath32 {
     }
 }
 
-// File @sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol@v1.4.2
+// File @polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol@v1.4.2
 // License-Identifier: GPL-3.0
 
 interface IUniswapV2Factory {
@@ -140,7 +140,7 @@ interface IUniswapV2Factory {
     function setMigrator(address) external;
 }
 
-// File @sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol@v1.4.2
+// File @polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol@v1.4.2
 // License-Identifier: GPL-3.0
 
 interface IUniswapV2Pair {
@@ -424,7 +424,7 @@ contract SimpleSLPTWAP1OracleV1 is IOracle {
 
     /// @inheritdoc IOracle
     function name(bytes calldata) public view override returns (string memory) {
-        return "SushiSwap TWAP";
+        return "PolyCityDex TWAP";
     }
 
     /// @inheritdoc IOracle

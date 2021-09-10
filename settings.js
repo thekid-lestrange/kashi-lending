@@ -2,7 +2,7 @@ module.exports = {
     hardhat: {
         solidity: {
             overrides: {
-                "contracts/KashiPair.sol": {
+                "contracts/KushoPair.sol": {
                     version: "0.6.12",
                     settings: {
                         optimizer: {
@@ -11,7 +11,7 @@ module.exports = {
                         },
                     },
                 },
-                "contracts/mocks/KashiPairMock.sol": {
+                "contracts/mocks/KushoPairMock.sol": {
                     version: "0.6.12",
                     settings: {
                         optimizer: {
@@ -20,7 +20,7 @@ module.exports = {
                         },
                     },
                 },
-                "contracts/flat/BentoBoxFlat.sol": {
+                "contracts/flat/AntiqueBoxFlat.sol": {
                     version: "0.6.12",
                     settings: {
                         optimizer: {
@@ -29,7 +29,7 @@ module.exports = {
                         },
                     },
                 },
-                "contracts/flat/KashiPairFlat.sol": {
+                "contracts/flat/KushoPairFlat.sol": {
                     version: "0.6.12",
                     settings: {
                         optimizer: {
@@ -38,7 +38,7 @@ module.exports = {
                         },
                     },
                 },
-                "contracts/flat/SushiSwapSwapperFlat.sol": {
+                "contracts/flat/PolyCityDexSwapperFlat.sol": {
                     version: "0.6.12",
                     settings: {
                         optimizer: {
@@ -56,7 +56,7 @@ module.exports = {
                         },
                     },
                 },
-                "contracts/flat/SimpleSLPTWAP0OracleFlat.sol": {
+                "contracts/flat/SimplePolyLpTWAP0OracleFlat.sol": {
                     version: "0.6.12",
                     settings: {
                         optimizer: {
@@ -65,7 +65,7 @@ module.exports = {
                         },
                     },
                 },
-                "contracts/flat/SimpleSLPTWAP1OracleFlat.sol": {
+                "contracts/flat/SimplePolyLpTWAP1OracleFlat.sol": {
                     version: "0.6.12",
                     settings: {
                         optimizer: {
@@ -119,9 +119,9 @@ module.exports = {
             "libraries/FixedPoint.sol",
             "libraries/FullMath.sol",
             "libraries/SignedSafeMath.sol",
-            "flat/BentoBoxFlat.sol",
-            "flat/KashiPairFlat.sol",
-            "flat/SushiSwapSwapperFlat.sol",
+            "flat/AntiqueBoxFlat.sol",
+            "flat/KushoPairFlat.sol",
+            "flat/PolyCityDexSwapperFlat.sol",
         ],
     },
     prettier: {

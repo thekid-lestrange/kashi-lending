@@ -1,4 +1,4 @@
-const { weth, getBigNumber } = require("@sushiswap/hardhat-framework")
+const { weth, getBigNumber } = require("@polycity/hardhat-framework")
 
 module.exports = async function (hre) {
     const factory_abi = [
@@ -27,9 +27,9 @@ module.exports = async function (hre) {
     console.log("Balance:", (await funder.getBalance()).div("1000000000000000000").toString())
     const deployerBalance = await deployer.getBalance()
 
-    let sushiOwner = "0x10601b88F47e5FAfE9Da5Ac855c9E98e79903280"
+    let pichiOwner = "0x10601b88F47e5FAfE9Da5Ac855c9E98e79903280"
     if (chainId == "1") {
-        let sushiOwner = "0x19B3Eb3Af5D93b77a5619b047De0EED7115A19e7"
+        let pichiOwner = "0x19B3Eb3Af5D93b77a5619b047De0EED7115A19e7"
     }
 
     let gasPrice = await funder.provider.getGasPrice()
@@ -67,8 +67,8 @@ module.exports = async function (hre) {
     }
 
     /*
-    console.log("Deploying Bentobox contract")
-    tx = await hre.deployments.deploy("BentoBoxV1", {
+    console.log("Deploying Antiquebox contract")
+    tx = await hre.deployments.deploy("AntiqueBoxV1", {
         from: deployer.address,
         args: [weth(chainId)],
         log: true,
@@ -77,13 +77,13 @@ module.exports = async function (hre) {
         gasPrice: finalGasPrice,
     })
 
-    const bentobox = (await hre.ethers.getContractFactory("BentoBoxV1")).attach((await deployments.get("BentoBoxV1")).address)
+    const antiquebox = (await hre.ethers.getContractFactory("AntiqueBoxV1")).attach((await deployments.get("AntiqueBoxV1")).address)
     */
-    const bentobox = (await hre.ethers.getContractFactory("BentoBoxV1")).attach("0xF5BCE5077908a1b7370B9ae04AdC565EBd643966")
-    console.log("Deploying KashiPair contract, using BentoBox", bentobox.address)
-    tx = await hre.deployments.deploy("KashiPairMediumRiskV1", {
+    const antiquebox = (await hre.ethers.getContractFactory("AntiqueBoxV1")).attach("0xF5BCE5077908a1b7370B9ae04AdC565EBd643966")
+    console.log("Deploying KushoPair contract, using AntiqueBox", antiquebox.address)
+    tx = await hre.deployments.deploy("KushoPairMediumRiskV1", {
         from: deployer.address,
-        args: [bentobox.address],
+        args: [antiquebox.address],
         log: true,
         deterministicDeployment: false,
         gasLimit: 5500000,
@@ -91,9 +91,9 @@ module.exports = async function (hre) {
     })
     /*
     console.log("Deploying Swapper contract")
-    tx = await hre.deployments.deploy("SushiSwapSwapperV1", {
+    tx = await hre.deployments.deploy("PolyCityDexSwapperV1", {
         from: deployer.address,
-        args: [bentobox.address, factory, initCodeHash],
+        args: [antiquebox.address, factory, initCodeHash],
         log: true,
         deterministicDeployment: false,
         gasLimit: 1300000,
@@ -164,7 +164,7 @@ module.exports = async function (hre) {
                 ? "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
                 : "0x0000000000000000000000000000000000000000",
             chainId == 1 ? "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272" : "0x1be211D8DA40BC0ae8719c6663307Bfc987b1d6c",
-            bentobox.address,
+            antiquebox.address,
         ],
         log: true,
         deterministicDeployment: false,
@@ -172,35 +172,35 @@ module.exports = async function (hre) {
         gasPrice: finalGasPrice,
     })
 */
-    const kashipair = (await hre.ethers.getContractFactory("KashiPairMediumRiskV1")).attach(
-        (await deployments.get("KashiPairMediumRiskV1")).address
+    const kushopair = (await hre.ethers.getContractFactory("KushoPairMediumRiskV1")).attach(
+        (await deployments.get("KushoPairMediumRiskV1")).address
     )
-    /*  const swapper = (await hre.ethers.getContractFactory("SushiSwapSwapperV1")).attach((await deployments.get("SushiSwapSwapperV1")).address)
+    /*  const swapper = (await hre.ethers.getContractFactory("PolyCityDexSwapperV1")).attach((await deployments.get("PolyCityDexSwapperV1")).address)
      */
-    const swapper = (await hre.ethers.getContractFactory("SushiSwapSwapperV1")).attach("0x1766733112408b95239aD1951925567CB1203084")
+    const swapper = (await hre.ethers.getContractFactory("PolyCityDexSwapperV1")).attach("0x1766733112408b95239aD1951925567CB1203084")
     console.log("Whitelisting Swapper")
-    tx = await kashipair.connect(deployer).setSwapper(swapper.address, true, {
+    tx = await kushopair.connect(deployer).setSwapper(swapper.address, true, {
         gasLimit: 100000,
         gasPrice: finalGasPrice,
     })
     await tx.wait()
 
-    console.log("Update KashiPair Owner")
-    tx = await kashipair.connect(deployer).transferOwnership(sushiOwner, true, false, {
+    console.log("Update KushoPair Owner")
+    tx = await kushopair.connect(deployer).transferOwnership(pichiOwner, true, false, {
         gasLimit: 100000,
         gasPrice: finalGasPrice,
     })
     await tx.wait()
     /*
-    console.log("Whitelisting KashiPair")
-    tx = await bentobox.whitelistMasterContract(kashipair.address, true, {
+    console.log("Whitelisting KushoPair")
+    tx = await antiquebox.whitelistMasterContract(kushopair.address, true, {
         gasLimit: 100000,
         gasPrice: finalGasPrice,
     })
     await tx.wait()
 
-    console.log("Update BentoBox Owner")
-    await bentobox.transferOwnership(sushiOwner, true, false, {
+    console.log("Update AntiqueBox Owner")
+    await antiquebox.transferOwnership(pichiOwner, true, false, {
         gasLimit: 100000,
         gasPrice: finalGasPrice,
     })*/

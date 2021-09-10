@@ -4,8 +4,8 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 import "../interfaces/IOracle.sol";
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
-import "@sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol";
-import "@sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol";
+import "@polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol";
+import "@polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "../libraries/FixedPoint.sol";
 
 // solhint-disable not-rely-on-time
@@ -98,7 +98,7 @@ contract SimpleSLPTWAP1Oracle is IOracle {
 
     /// @inheritdoc IOracle
     function name(bytes calldata) public view override returns (string memory) {
-        return "SushiSwap TWAP";
+        return "PolyCityDex TWAP";
     }
 
     /// @inheritdoc IOracle

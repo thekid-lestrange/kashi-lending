@@ -4,8 +4,8 @@
         {
             "inputs": [
                 {
-                    "internalType": "contract IBentoBoxV1",
-                    "name": "bentoBox_",
+                    "internalType": "contract IAntiqueBoxV1",
+                    "name": "antiqueBox_",
                     "type": "address"
                 }
             ],
@@ -514,10 +514,10 @@
         },
         {
             "inputs": [],
-            "name": "bentoBox",
+            "name": "antiqueBox",
             "outputs": [
                 {
-                    "internalType": "contract IBentoBoxV1",
+                    "internalType": "contract IAntiqueBoxV1",
                     "name": "",
                     "type": "address"
                 }
@@ -698,7 +698,7 @@
             "name": "masterContract",
             "outputs": [
                 {
-                    "internalType": "contract KashiPairMediumRiskV1",
+                    "internalType": "contract KushoPairMediumRiskV1",
                     "name": "",
                     "type": "address"
                 }

@@ -1,9 +1,9 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "@sushiswap/bentobox-sdk/contracts/BentoBoxV1.sol";
+import "@polycity/antiquebox-sdk/contracts/AntiqueBoxV1.sol";
 // Note: Rebasing tokens ARE NOT supported and WILL cause loss of funds
-contract SimpleBentoBox is BentoBoxV1 {
+contract SimpleAntiqueBox is AntiqueBoxV1 {
 	using BoringMath for uint256;
 
 	uint256 private constant RATIO = 2;
@@ -41,7 +41,7 @@ contract SimpleBentoBox is BentoBoxV1 {
 		super.withdraw(token_, from, to, amount, share); 
 	}
 */
-	constructor(IERC20 wethToken_) BentoBoxV1(wethToken_) public { }
+	constructor(IERC20 wethToken_) AntiqueBoxV1(wethToken_) public { }
 
 	function batch(bytes[] calldata calls, bool revertOnFail) 
 		external override payable returns(bool[] memory successes, bytes[] memory results) {

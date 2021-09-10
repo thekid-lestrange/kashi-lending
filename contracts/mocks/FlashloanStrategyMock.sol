@@ -1,45 +1,45 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
-import "@sushiswap/bentobox-sdk/contracts/IStrategy.sol";
-import "@sushiswap/bentobox-sdk/contracts/IFlashBorrower.sol";
-import "@sushiswap/bentobox-sdk/contracts/IBentoBoxV1.sol";
-import "@sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol";
-import "@sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol";
+import "@polycity/antiquebox-sdk/contracts/IStrategy.sol";
+import "@polycity/antiquebox-sdk/contracts/IFlashBorrower.sol";
+import "@polycity/antiquebox-sdk/contracts/IAntiqueBoxV1.sol";
+import "@polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol";
+import "@polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
-import "../KashiPair.sol";
-import "../KashiPairHelper.sol";
+import "../KushoPair.sol";
+import "../KushoPairHelper.sol";
 import "../interfaces/ISwapper.sol";
 
 // solhint-disable not-rely-on-time
 
-contract FlashloanStrategyMock is IStrategy, IFlashBorrower, KashiPairHelper {
+contract FlashloanStrategyMock is IStrategy, IFlashBorrower, KushoPairHelper {
     using BoringMath for uint256;
     using BoringERC20 for IERC20;
 
     IERC20 private immutable assetToken;
     IERC20 private immutable collateralToken;
-    KashiPair private immutable kashiPair;
-    IBentoBoxV1 private immutable bentoBox;
+    KushoPair private immutable kushoPair;
+    IAntiqueBoxV1 private immutable antiqueBox;
     ISwapper private immutable swapper;
     address private immutable target;
     IUniswapV2Factory public factory;
 
-    modifier onlyBentoBox() {
-        require(msg.sender == address(bentoBox), "only bentoBox");
+    modifier onlyAntiqueBox() {
+        require(msg.sender == address(antiqueBox), "only antiqueBox");
         _;
     }
 
     constructor(
-        IBentoBoxV1 bentoBox_,
-        KashiPair _kashiPair,
+        IAntiqueBoxV1 antiqueBox_,
+        KushoPair _kushoPair,
         IERC20 asset,
         IERC20 collateral,
         ISwapper _swapper,
         IUniswapV2Factory _factory
     ) public {
-        bentoBox = bentoBox_;
-        kashiPair = _kashiPair;
+        antiqueBox = antiqueBox_;
+        kushoPair = _kushoPair;
         assetToken = asset;
         collateralToken = collateral;
         swapper = _swapper;
@@ -48,32 +48,32 @@ contract FlashloanStrategyMock is IStrategy, IFlashBorrower, KashiPairHelper {
     }
 
     // Send the assets to the Strategy and call skim to invest them
-    function skim(uint256) external override onlyBentoBox {
+    function skim(uint256) external override onlyAntiqueBox {
         // Leave the tokens on the contract
         return;
     }
 
     // Harvest any profits made converted to the asset and pass them to the caller
-    function harvest(uint256 balance, address) external override onlyBentoBox returns (int256 amountAdded) {
+    function harvest(uint256 balance, address) external override onlyAntiqueBox returns (int256 amountAdded) {
         // flashloan everything we can
-        uint256 flashAmount = assetToken.balanceOf(address(bentoBox));
-        bentoBox.flashLoan(IFlashBorrower(this), address(this), assetToken, flashAmount, new bytes(0));
+        uint256 flashAmount = assetToken.balanceOf(address(antiqueBox));
+        antiqueBox.flashLoan(IFlashBorrower(this), address(this), assetToken, flashAmount, new bytes(0));
 
         // Profit is any leftover after the flashloan and liquidation succeeded
         amountAdded = int256(assetToken.balanceOf(address(this)).sub(balance));
-        assetToken.safeTransfer(address(bentoBox), uint256(amountAdded));
+        assetToken.safeTransfer(address(antiqueBox), uint256(amountAdded));
     }
 
     // Withdraw assets. The returned amount can differ from the requested amount due to rounding or if the request was more than there is.
-    function withdraw(uint256 amount) external override onlyBentoBox returns (uint256 actualAmount) {
-        assetToken.safeTransfer(address(bentoBox), uint256(amount));
+    function withdraw(uint256 amount) external override onlyAntiqueBox returns (uint256 actualAmount) {
+        assetToken.safeTransfer(address(antiqueBox), uint256(amount));
         actualAmount = amount;
     }
 
     // Withdraw all assets in the safest way possible. This shouldn't fail.
-    function exit(uint256 balance) external override onlyBentoBox returns (int256 amountAdded) {
+    function exit(uint256 balance) external override onlyAntiqueBox returns (int256 amountAdded) {
         amountAdded = 0;
-        assetToken.safeTransfer(address(bentoBox), balance);
+        assetToken.safeTransfer(address(antiqueBox), balance);
     }
 
     // Given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
@@ -95,23 +95,23 @@ contract FlashloanStrategyMock is IStrategy, IFlashBorrower, KashiPairHelper {
         uint256 amount,
         uint256 fee,
         bytes calldata /*data*/
-    ) external override onlyBentoBox {
+    ) external override onlyAntiqueBox {
         require(token == assetToken);
 
-        // approve kashiPair
-        bentoBox.setMasterContractApproval(address(this), address(kashiPair.masterContract()), true, 0, 0, 0);
-        // approve & deposit asset into bentoBox
-        assetToken.approve(address(bentoBox), amount);
-        bentoBox.deposit(assetToken, address(this), address(this), amount, 0);
+        // approve kushoPair
+        antiqueBox.setMasterContractApproval(address(this), address(kushoPair.masterContract()), true, 0, 0, 0);
+        // approve & deposit asset into antiqueBox
+        assetToken.approve(address(antiqueBox), amount);
+        antiqueBox.deposit(assetToken, address(this), address(this), amount, 0);
 
         // update exchange rate first
-        kashiPair.updateExchangeRate();
+        kushoPair.updateExchangeRate();
         // calculate how much we can liquidate
         uint256 PREC = 1e5;
-        uint256 targetBorrowPart = kashiPair.userBorrowPart(target);
+        uint256 targetBorrowPart = kushoPair.userBorrowPart(target);
         // round up
         uint256 divisor =
-            (KashiPairHelper.getCollateralSharesForBorrowPart(kashiPair, targetBorrowPart) * PREC) / (kashiPair.userCollateralShare(target)) + 1;
+            (KushoPairHelper.getCollateralSharesForBorrowPart(kushoPair, targetBorrowPart) * PREC) / (kushoPair.userCollateralShare(target)) + 1;
         // setup
         address[] memory users = new address[](1);
         uint256[] memory amounts = new uint256[](1);
@@ -119,15 +119,15 @@ contract FlashloanStrategyMock is IStrategy, IFlashBorrower, KashiPairHelper {
         amounts[0] = (targetBorrowPart * PREC) / divisor;
 
         // get rid of some assets and receive collateral
-        kashiPair.liquidate(users, amounts, address(this), ISwapper(address(0)), true);
+        kushoPair.liquidate(users, amounts, address(this), ISwapper(address(0)), true);
 
         // swap the collateral to asset
         IUniswapV2Pair pair = IUniswapV2Pair(factory.getPair(address(collateralToken), address(assetToken)));
         // withdraw collateral to uniswap
         (uint256 amountFrom, ) =
-            bentoBox.withdraw(collateralToken, address(this), address(pair), 0, bentoBox.balanceOf(collateralToken, address(this)));
+            antiqueBox.withdraw(collateralToken, address(this), address(pair), 0, antiqueBox.balanceOf(collateralToken, address(this)));
         // withdraw remaining assets
-        bentoBox.withdraw(assetToken, address(this), address(this), 0, bentoBox.balanceOf(assetToken, address(this)));
+        antiqueBox.withdraw(assetToken, address(this), address(this), 0, antiqueBox.balanceOf(assetToken, address(this)));
 
         {
             // swap
@@ -141,7 +141,7 @@ contract FlashloanStrategyMock is IStrategy, IFlashBorrower, KashiPairHelper {
             }
         }
 
-        // transfer flashloan + fee back to bentoBox
+        // transfer flashloan + fee back to antiqueBox
         assetToken.safeTransfer(msg.sender, amount.add(fee));
     }
 }

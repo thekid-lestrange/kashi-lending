@@ -1,11 +1,11 @@
 pragma solidity 0.6.12;
 import "@boringcrypto/boring-solidity/contracts/interfaces/IERC20.sol";
 import "../../contracts/interfaces/ISwapper.sol";
-import "@sushiswap/bentobox-sdk/contracts/IBentoBoxV1.sol";
+import "@polycity/antiquebox-sdk/contracts/IAntiqueBoxV1.sol";
 
 contract Swapper is ISwapper {
     // Local variables
-    IBentoBoxV1 public bentoBox;
+    IAntiqueBoxV1 public antiqueBox;
 
 	IERC20 public generalToken;
     address public generalTo; 

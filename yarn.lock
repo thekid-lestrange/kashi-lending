@@ -481,6 +481,39 @@
     "@types/sinon-chai" "^3.2.3"
     "@types/web3" "1.0.19"
 
+"@polycity/antiquebox-sdk@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@polycity/antiquebox-sdk/-/antiquebox-sdk-1.0.2.tgz#f53bf407f5af16df70f1237d81f46a2717d5e314"
+  integrity sha512-WvwGruTRS1W3xPrRGeHslioFJoqNJ2CeEKnXoBSMhvxKqk7jh7+xbyuZJnVp8y+y0AaRv4QHufmj0etR7Mvf3w==
+  dependencies:
+    "@boringcrypto/boring-solidity" boringcrypto/BoringSolidity#371a01c11465eb1c881193c60a53c0bf15ee8a19
+
+"@polycity/core@2.0.0-canary.3":
+  version "2.0.0-canary.3"
+  resolved "https://registry.yarnpkg.com/@polycity/core/-/core-2.0.0-canary.3.tgz#71b78d79fe5d004b23865229bc11f8af964376ec"
+  integrity sha512-6IE0/knWKo+w4Wk8ogwaJOZb0i7193YWo1jRxHgJ83EoA8HizpfbXPMSUqvrTcq08/9+b2vSA3hcxevwbUeVGw==
+
+"@polycity/hardhat-framework@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@polycity/hardhat-framework/-/hardhat-framework-1.0.1.tgz#d888e5246def377845f9897b30a9aff4cf1037b0"
+  integrity sha512-WVz2VMawAlhHEuQXt6tqWtvvqzMlogYtU0FicOvoVrBNolRMFeuvxLFHv2o2z5P0u1irXDcrqX3sCZA4+qWsGQ==
+  dependencies:
+    "@nomiclabs/hardhat-ethers" "^2.0.1"
+    "@nomiclabs/hardhat-waffle" "^2.0.1"
+    chai "^4.3.0"
+    dotenv "^8.2.0"
+    ethereum-waffle "^3.2.2"
+    ethers "^5.0.31"
+    hardhat "^2.0.10"
+    hardhat-deploy "^0.7.0-beta.44"
+    hardhat-gas-reporter "^1.0.4"
+    husky "^5.0.9"
+    prettier "^2.2.1"
+    prettier-plugin-solidity "^1.0.0-beta.5"
+    pretty-quick "^3.1.0"
+    solc "0.6.12"
+    solidity-coverage "^0.7.14"
+
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@resolver-engine/core/-/core-0.3.3.tgz#590f77d85d45bc7ecc4e06c654f41345db6ca967"
@@ -600,37 +633,6 @@
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/@solidity-parser/parser/-/parser-0.12.0.tgz#18a0fb2a9d2484b23176f63b16093c64794fc323"
   integrity sha512-DT3f/Aa4tQysZwUsuqBwvr8YRJzKkvPUKV/9o2/o5EVw3xqlbzmtx4O60lTUcZdCawL+N8bBLNUyOGpHjGlJVQ==
-
-"@sushiswap/bentobox-sdk@sushiswap/bentobox-sdk#e3f809870b86afbd57e0930662221d2362a160db":
-  version "1.0.2"
-  resolved "https://codeload.github.com/sushiswap/bentobox-sdk/tar.gz/e3f809870b86afbd57e0930662221d2362a160db"
-  dependencies:
-    "@boringcrypto/boring-solidity" boringcrypto/BoringSolidity#371a01c11465eb1c881193c60a53c0bf15ee8a19
-
-"@sushiswap/core@^1.4.2":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@sushiswap/core/-/core-1.4.2.tgz#065a6613f842ab7ac6d12878072b59327bffa296"
-  integrity sha512-Khd2i6Bob9uk7dCgVkhUioEoxRP28m6aj25MegAHvnJyxZPVzZDhxSkeL6wdv5MeAp2DwHkYqUq03KDfVTTP4Q==
-
-"@sushiswap/hardhat-framework@sushiswap/hardhat-framework#44c25f9f9d861e812399a2d5773449b368f31619":
-  version "1.1.5"
-  resolved "https://codeload.github.com/sushiswap/hardhat-framework/tar.gz/44c25f9f9d861e812399a2d5773449b368f31619"
-  dependencies:
-    "@nomiclabs/hardhat-ethers" "^2.0.1"
-    "@nomiclabs/hardhat-waffle" "^2.0.1"
-    chai "^4.3.0"
-    dotenv "^8.2.0"
-    ethereum-waffle "^3.2.2"
-    ethers "^5.0.31"
-    hardhat "^2.0.10"
-    hardhat-deploy "^0.7.0-beta.44"
-    hardhat-gas-reporter "^1.0.4"
-    husky "^5.0.9"
-    prettier "^2.2.1"
-    prettier-plugin-solidity "^1.0.0-beta.5"
-    pretty-quick "^3.1.0"
-    solc "0.6.12"
-    solidity-coverage "^0.7.14"
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"

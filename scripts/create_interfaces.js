@@ -90,4 +90,4 @@ function createInterface(name, file) {
     })
 }
 
-createInterface("KashiPair", "bin/contracts/KashiPair.abi")
+createInterface("KushoPair", "bin/contracts/KushoPair.abi")

@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
-import "@sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol";
-import "@sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol";
+import "@polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol";
+import "@polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "../interfaces/ISwapper.sol";
-import "@sushiswap/bentobox-sdk/contracts/IBentoBoxV1.sol";
+import "@polycity/antiquebox-sdk/contracts/IAntiqueBoxV1.sol";
 
-contract SushiSwapSwapper is ISwapper {
+contract PolyCityDexSwapper is ISwapper {
     using BoringMath for uint256;
 
     // Local variables
-    IBentoBoxV1 public immutable bentoBox;
+    IAntiqueBoxV1 public immutable antiqueBox;
     IUniswapV2Factory public immutable factory;
     bytes32 public immutable pairCodeHash;
 
     constructor(
-        IBentoBoxV1 bentoBox_,
+        IAntiqueBoxV1 antiqueBox_,
         IUniswapV2Factory factory_,
         bytes32 pairCodeHash_
     ) public {
-        bentoBox = bentoBox_;
+        antiqueBox = antiqueBox_;
         factory = factory_;
         pairCodeHash = pairCodeHash_;
     }
@@ -64,18 +64,18 @@ contract SushiSwapSwapper is ISwapper {
                 )
             );
 
-        (uint256 amountFrom, ) = bentoBox.withdraw(fromToken, address(this), address(pair), 0, shareFrom);
+        (uint256 amountFrom, ) = antiqueBox.withdraw(fromToken, address(this), address(pair), 0, shareFrom);
 
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
         uint256 amountTo;
         if (toToken > fromToken) {
             amountTo = getAmountOut(amountFrom, reserve0, reserve1);
-            pair.swap(0, amountTo, address(bentoBox), new bytes(0));
+            pair.swap(0, amountTo, address(antiqueBox), new bytes(0));
         } else {
             amountTo = getAmountOut(amountFrom, reserve1, reserve0);
-            pair.swap(amountTo, 0, address(bentoBox), new bytes(0));
+            pair.swap(amountTo, 0, address(antiqueBox), new bytes(0));
         }
-        (, shareReturned) = bentoBox.deposit(toToken, address(bentoBox), recipient, amountTo, 0);
+        (, shareReturned) = antiqueBox.deposit(toToken, address(antiqueBox), recipient, amountTo, 0);
         extraShare = shareReturned.sub(shareToMin);
     }
 
@@ -100,22 +100,22 @@ contract SushiSwapSwapper is ISwapper {
         }
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
 
-        uint256 amountToExact = bentoBox.toAmount(toToken, shareToExact, true);
+        uint256 amountToExact = antiqueBox.toAmount(toToken, shareToExact, true);
 
         uint256 amountFrom;
         if (toToken > fromToken) {
             amountFrom = getAmountIn(amountToExact, reserve0, reserve1);
-            (, shareUsed) = bentoBox.withdraw(fromToken, address(this), address(pair), amountFrom, 0);
-            pair.swap(0, amountToExact, address(bentoBox), "");
+            (, shareUsed) = antiqueBox.withdraw(fromToken, address(this), address(pair), amountFrom, 0);
+            pair.swap(0, amountToExact, address(antiqueBox), "");
         } else {
             amountFrom = getAmountIn(amountToExact, reserve1, reserve0);
-            (, shareUsed) = bentoBox.withdraw(fromToken, address(this), address(pair), amountFrom, 0);
-            pair.swap(amountToExact, 0, address(bentoBox), "");
+            (, shareUsed) = antiqueBox.withdraw(fromToken, address(this), address(pair), amountFrom, 0);
+            pair.swap(amountToExact, 0, address(antiqueBox), "");
         }
-        bentoBox.deposit(toToken, address(bentoBox), recipient, 0, shareToExact);
+        antiqueBox.deposit(toToken, address(antiqueBox), recipient, 0, shareToExact);
         shareReturned = shareFromSupplied.sub(shareUsed);
         if (shareReturned > 0) {
-            bentoBox.transfer(fromToken, address(this), refundTo, shareReturned);
+            antiqueBox.transfer(fromToken, address(this), refundTo, shareReturned);
         }
     }
 }

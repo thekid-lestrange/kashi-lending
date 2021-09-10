@@ -35,9 +35,9 @@ interface IMasterChef {
 
     function startBlock() external view returns (uint256);
 
-    function sushi() external view returns (address);
+    function pichi() external view returns (address);
 
-    function sushiPerBlock() external view returns (uint256);
+    function pichiPerBlock() external view returns (uint256);
 
     function totalAllocPoint() external view returns (uint256);
 
@@ -55,7 +55,7 @@ interface IMasterChef {
 
     function userInfo(uint256 nr, address who) external view returns (uint256, uint256);
 
-    function pendingSushi(uint256 nr, address who) external view returns (uint256);
+    function pendingPichi(uint256 nr, address who) external view returns (uint256);
 }
 
 interface IPair is IERC20 {
@@ -174,7 +174,7 @@ interface IStrategy {
     function exit(uint256 balance) external returns (int256 amountAdded);
 }
 
-interface IBentoBox {
+interface IAntiqueBox {
     event LogDeploy(address indexed masterContract, bytes data, address indexed cloneAddress);
     event LogDeposit(address indexed token, address indexed from, address indexed to, uint256 amount, uint256 share);
     event LogFlashLoan(address indexed borrower, address indexed token, uint256 amount, uint256 feeAmount, address indexed receiver);
@@ -337,7 +337,7 @@ interface IOracle {
     function name(bytes calldata data) external view returns (string memory);
 }
 
-interface IKashiPair {
+interface IKushoPair {
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 
     function accrue() external;
@@ -364,7 +364,7 @@ interface IKashiPair {
 
     function balanceOf(address) external view returns (uint256);
 
-    function bentoBox() external view returns (IBentoBox);
+    function antiqueBox() external view returns (IAntiqueBox);
 
     function borrow(address to, uint256 amount) external returns (uint256 part, uint256 share);
 
@@ -483,57 +483,57 @@ contract BoringHelperV1 is Ownable {
     using BoringPair for IPair;
 
     IMasterChef public chef; // IMasterChef(0xc2EdaD668740f1aA35E4D8f227fB8E17dcA888Cd);
-    address public maker; // ISushiMaker(0xE11fc0B43ab98Eb91e9836129d1ee7c3Bc95df50);
-    IERC20 public sushi; // ISushiToken(0x6B3595068778DD592e39A122f4f5a5cF09C90fE2);
+    address public maker; // IPichiMaker(0xE11fc0B43ab98Eb91e9836129d1ee7c3Bc95df50);
+    IERC20 public pichi; // IPichiToken(0x6B3595068778DD592e39A122f4f5a5cF09C90fE2);
     IERC20 public WETH; // 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     IERC20 public WBTC; // 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
-    IFactory public sushiFactory; // IFactory(0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac);
+    IFactory public polyCityDexFactory; // IFactory(0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac);
     IFactory public uniV2Factory; // IFactory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
-    IERC20 public bar; // 0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272;
-    IBentoBox public bentoBox; // 0xB5891167796722331b7ea7824F036b3Bdcb4531C
+    IERC20 public hall; // 0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272;
+    IAntiqueBox public antiqueBox; // 0xB5891167796722331b7ea7824F036b3Bdcb4531C
 
     constructor(
         IMasterChef chef_,
         address maker_,
-        IERC20 sushi_,
+        IERC20 pichi_,
         IERC20 WETH_,
         IERC20 WBTC_,
-        IFactory sushiFactory_,
+        IFactory polyCityDexFactory_,
         IFactory uniV2Factory_,
-        IERC20 bar_,
-        IBentoBox bentoBox_
+        IERC20 hall_,
+        IAntiqueBox antiqueBox_
     ) public {
         chef = chef_;
         maker = maker_;
-        sushi = sushi_;
+        pichi = pichi_;
         WETH = WETH_;
         WBTC = WBTC_;
-        sushiFactory = sushiFactory_;
+        polyCityDexFactory = polyCityDexFactory_;
         uniV2Factory = uniV2Factory_;
-        bar = bar_;
-        bentoBox = bentoBox_;
+        hall = hall_;
+        antiqueBox = antiqueBox_;
     }
 
     function setContracts(
         IMasterChef chef_,
         address maker_,
-        IERC20 sushi_,
+        IERC20 pichi_,
         IERC20 WETH_,
         IERC20 WBTC_,
-        IFactory sushiFactory_,
+        IFactory polyCityDexFactory_,
         IFactory uniV2Factory_,
-        IERC20 bar_,
-        IBentoBox bentoBox_
+        IERC20 hall_,
+        IAntiqueBox antiqueBox_
     ) public onlyOwner {
         chef = chef_;
         maker = maker_;
-        sushi = sushi_;
+        pichi = pichi_;
         WETH = WETH_;
         WBTC = WBTC_;
-        sushiFactory = sushiFactory_;
+        polyCityDexFactory = polyCityDexFactory_;
         uniV2Factory = uniV2Factory_;
-        bar = bar_;
-        bentoBox = bentoBox_;
+        hall = hall_;
+        antiqueBox = antiqueBox_;
     }
 
     function getETHRate(IERC20 token) public view returns (uint256) {
@@ -541,14 +541,14 @@ contract BoringHelperV1 is Ownable {
             return 1e18;
         }
         IPair pairUniV2;
-        IPair pairSushi;
+        IPair pairPichi;
         if (uniV2Factory != IFactory(0)) {
             pairUniV2 = IPair(uniV2Factory.getPair(token, WETH));
         }
-        if (sushiFactory != IFactory(0)) {
-            pairSushi = IPair(sushiFactory.getPair(token, WETH));
+        if (polyCityDexFactory != IFactory(0)) {
+            pairPichi = IPair(polyCityDexFactory.getPair(token, WETH));
         }
-        if (address(pairUniV2) == address(0) && address(pairSushi) == address(0)) {
+        if (address(pairUniV2) == address(0) && address(pairPichi) == address(0)) {
             return 0;
         }
 
@@ -562,12 +562,12 @@ contract BoringHelperV1 is Ownable {
             token0 = pairUniV2.token0();
         }
 
-        if (address(pairSushi) != address(0)) {
-            (uint112 reserve0Sushi, uint112 reserve1Sushi, ) = pairSushi.getReserves();
-            reserve0 += reserve0Sushi;
-            reserve1 += reserve1Sushi;
+        if (address(pairPichi) != address(0)) {
+            (uint112 reserve0Pichi, uint112 reserve1Pichi, ) = pairPichi.getReserves();
+            reserve0 += reserve0Pichi;
+            reserve1 += reserve1Pichi;
             if (token0 == IERC20(0)) {
-                token0 = pairSushi.token0();
+                token0 = pairPichi.token0();
             }
         }
 
@@ -585,16 +585,16 @@ contract BoringHelperV1 is Ownable {
 
     struct UIInfo {
         uint256 ethBalance;
-        uint256 sushiBalance;
-        uint256 sushiBarBalance;
-        uint256 xsushiBalance;
-        uint256 xsushiSupply;
-        uint256 sushiBarAllowance;
+        uint256 pichiBalance;
+        uint256 polyCityHallBalance;
+        uint256 xpichiBalance;
+        uint256 xpichiSupply;
+        uint256 polyCityHallAllowance;
         Factory[] factories;
         uint256 ethRate;
-        uint256 sushiRate;
+        uint256 pichiRate;
         uint256 btcRate;
-        uint256 pendingSushi;
+        uint256 pendingPichi;
         uint256 blockTimeStamp;
         bool[] masterContractApproved;
     }
@@ -617,7 +617,7 @@ contract BoringHelperV1 is Ownable {
 
         info.masterContractApproved = new bool[](masterContracts.length);
         for (uint256 i = 0; i < masterContracts.length; i++) {
-            info.masterContractApproved[i] = bentoBox.masterContractApproved(masterContracts[i], who);
+            info.masterContractApproved[i] = antiqueBox.masterContractApproved(masterContracts[i], who);
         }
 
         if (currency != IERC20(0)) {
@@ -628,25 +628,25 @@ contract BoringHelperV1 is Ownable {
             info.btcRate = getETHRate(WBTC);
         }
 
-        if (sushi != IERC20(0)) {
-            info.sushiRate = getETHRate(sushi);
-            info.sushiBalance = sushi.balanceOf(who);
-            info.sushiBarBalance = sushi.balanceOf(address(bar));
-            info.sushiBarAllowance = sushi.allowance(who, address(bar));
+        if (pichi != IERC20(0)) {
+            info.pichiRate = getETHRate(pichi);
+            info.pichiBalance = pichi.balanceOf(who);
+            info.polyCityHallBalance = pichi.balanceOf(address(hall));
+            info.polyCityHallAllowance = pichi.allowance(who, address(hall));
         }
 
-        if (bar != IERC20(0)) {
-            info.xsushiBalance = bar.balanceOf(who);
-            info.xsushiSupply = bar.totalSupply();
+        if (hall != IERC20(0)) {
+            info.xpichiBalance = hall.balanceOf(who);
+            info.xpichiSupply = hall.totalSupply();
         }
 
         if (chef != IMasterChef(0)) {
             uint256 poolLength = chef.poolLength();
-            uint256 pendingSushi;
+            uint256 pendingPichi;
             for (uint256 i = 0; i < poolLength; i++) {
-                pendingSushi += chef.pendingSushi(i, who);
+                pendingPichi += chef.pendingPichi(i, who);
             }
-            info.pendingSushi = pendingSushi;
+            info.pendingPichi = pendingPichi;
         }
         info.blockTimeStamp = block.timestamp;
 
@@ -656,18 +656,18 @@ contract BoringHelperV1 is Ownable {
     struct Balance {
         IERC20 token;
         uint256 balance;
-        uint256 bentoBalance;
+        uint256 antiqueBalance;
     }
 
     struct BalanceFull {
         IERC20 token;
         uint256 totalSupply;
         uint256 balance;
-        uint256 bentoBalance;
-        uint256 bentoAllowance;
+        uint256 antiqueBalance;
+        uint256 antiqueAllowance;
         uint256 nonce;
-        uint128 bentoAmount;
-        uint128 bentoShare;
+        uint128 antiqueAmount;
+        uint128 antiqueShare;
         uint256 rate;
     }
 
@@ -703,7 +703,7 @@ contract BoringHelperV1 is Ownable {
             IERC20 token = IERC20(addresses[i]);
             balances[i].token = token;
             balances[i].balance = token.balanceOf(who);
-            balances[i].bentoBalance = bentoBox.balanceOf(token, who);
+            balances[i].antiqueBalance = antiqueBox.balanceOf(token, who);
         }
 
         return balances;
@@ -717,10 +717,10 @@ contract BoringHelperV1 is Ownable {
             balances[i].totalSupply = token.totalSupply();
             balances[i].token = token;
             balances[i].balance = token.balanceOf(who);
-            balances[i].bentoAllowance = token.allowance(who, address(bentoBox));
+            balances[i].antiqueAllowance = token.allowance(who, address(antiqueBox));
             balances[i].nonce = token.nonces(who);
-            balances[i].bentoBalance = bentoBox.balanceOf(token, who);
-            (balances[i].bentoAmount, balances[i].bentoShare) = bentoBox.totals(token);
+            balances[i].antiqueBalance = antiqueBox.balanceOf(token, who);
+            (balances[i].antiqueAmount, balances[i].antiqueShare) = antiqueBox.totals(token);
             balances[i].rate = getETHRate(token);
         }
 
@@ -847,7 +847,7 @@ contract BoringHelperV1 is Ownable {
         uint256 reserve0;
         uint256 reserve1;
         uint256 rewardDebt;
-        uint256 pending; // Pending SUSHI
+        uint256 pending; // Pending PICHI
     }
 
     function pollPools(address who, uint256[] calldata pids) public view returns (UserPoolInfo[] memory) {
@@ -856,7 +856,7 @@ contract BoringHelperV1 is Ownable {
         for (uint256 i = 0; i < pids.length; i++) {
             (uint256 amount, ) = chef.userInfo(pids[i], who);
             pools[i].balance = amount;
-            pools[i].pending = chef.pendingSushi(pids[i], who);
+            pools[i].pending = chef.pendingPichi(pids[i], who);
 
             (address lpToken, , , ) = chef.poolInfo(pids[i]);
             pools[i].pid = pids[i];
@@ -876,7 +876,7 @@ contract BoringHelperV1 is Ownable {
         return pools;
     }
 
-    struct KashiPairPoll {
+    struct KushoPairPoll {
         IERC20 collateral;
         IERC20 asset;
         IOracle oracle;
@@ -893,12 +893,12 @@ contract BoringHelperV1 is Ownable {
         AccrueInfo accrueInfo;
     }
 
-    function pollKashiPairs(address who, IKashiPair[] calldata pairsIn) public view returns (KashiPairPoll[] memory) {
+    function pollKushoPairs(address who, IKushoPair[] calldata pairsIn) public view returns (KushoPairPoll[] memory) {
         uint256 len = pairsIn.length;
-        KashiPairPoll[] memory pairs = new KashiPairPoll[](len);
+        KushoPairPoll[] memory pairs = new KushoPairPoll[](len);
 
         for (uint256 i = 0; i < len; i++) {
-            IKashiPair pair = pairsIn[i];
+            IKushoPair pair = pairsIn[i];
             pairs[i].collateral = pair.collateral();
             pairs[i].asset = pair.asset();
             pairs[i].oracle = pair.oracle();

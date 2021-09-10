@@ -6,38 +6,38 @@ const {
     sansSafetyAmount,
     advanceBlock,
     advanceTime,
-    KashiPairPermit,
+    KushoPairPermit,
     setMasterContractApproval,
-    setKashiPairContractApproval,
+    setKushoPairContractApproval,
     createFixture,
     ADDRESS_ZERO,
-    KashiPair,
+    KushoPair,
     advanceTimeAndBlock,
-} = require("@sushiswap/hardhat-framework")
+} = require("@polycity/hardhat-framework")
 const { defaultAbiCoder } = require("ethers/lib/utils")
 
 let cmd, fixture
 
 async function debugInfo(thisObject) {
-    console.log("Alice Collateral in Bento", (await thisObject.bentoBox.balanceOf(thisObject.a.address, thisObject.alice.address)).toString())
-    console.log("Bob Collateral in Bento", (await thisObject.bentoBox.balanceOf(thisObject.a.address, thisObject.bob.address)).toString())
+    console.log("Alice Collateral in Antique", (await thisObject.antiqueBox.balanceOf(thisObject.a.address, thisObject.alice.address)).toString())
+    console.log("Bob Collateral in Antique", (await thisObject.antiqueBox.balanceOf(thisObject.a.address, thisObject.bob.address)).toString())
     console.log(
-        "Swapper Collateral in Bento",
-        (await thisObject.bentoBox.balanceOf(thisObject.a.address, thisObject.swapper.address)).toString()
+        "Swapper Collateral in Antique",
+        (await thisObject.antiqueBox.balanceOf(thisObject.a.address, thisObject.swapper.address)).toString()
     )
-    console.log("Bento Collateral in Bento", (await thisObject.bentoBox.balanceOf(thisObject.a.address, thisObject.bentoBox.address)).toString())
+    console.log("Antique Collateral in Antique", (await thisObject.antiqueBox.balanceOf(thisObject.a.address, thisObject.antiqueBox.address)).toString())
     console.log(
-        "Pair Collateral in Bento",
-        (await thisObject.bentoBox.balanceOf(thisObject.a.address, thisObject.pairHelper.contract.address)).toString()
+        "Pair Collateral in Antique",
+        (await thisObject.antiqueBox.balanceOf(thisObject.a.address, thisObject.pairHelper.contract.address)).toString()
     )
     console.log()
-    console.log("Alice Asset in Bento", (await thisObject.bentoBox.balanceOf(thisObject.b.address, thisObject.alice.address)).toString())
-    console.log("Bob Asset in Bento", (await thisObject.bentoBox.balanceOf(thisObject.b.address, thisObject.bob.address)).toString())
-    console.log("Swapper Asset in Bento", (await thisObject.bentoBox.balanceOf(thisObject.b.address, thisObject.swapper.address)).toString())
-    console.log("Bento Asset in Bento", (await thisObject.bentoBox.balanceOf(thisObject.b.address, thisObject.bentoBox.address)).toString())
+    console.log("Alice Asset in Antique", (await thisObject.antiqueBox.balanceOf(thisObject.b.address, thisObject.alice.address)).toString())
+    console.log("Bob Asset in Antique", (await thisObject.antiqueBox.balanceOf(thisObject.b.address, thisObject.bob.address)).toString())
+    console.log("Swapper Asset in Antique", (await thisObject.antiqueBox.balanceOf(thisObject.b.address, thisObject.swapper.address)).toString())
+    console.log("Antique Asset in Antique", (await thisObject.antiqueBox.balanceOf(thisObject.b.address, thisObject.antiqueBox.address)).toString())
     console.log(
-        "Pair Asset in Bento",
-        (await thisObject.bentoBox.balanceOf(thisObject.b.address, thisObject.pairHelper.contract.address)).toString()
+        "Pair Asset in Antique",
+        (await thisObject.antiqueBox.balanceOf(thisObject.b.address, thisObject.pairHelper.contract.address)).toString()
     )
     console.log()
     console.log("Alice CollateralShare in Pair", (await thisObject.pairHelper.contract.userCollateralShare(thisObject.alice.address)).toString())
@@ -45,56 +45,56 @@ async function debugInfo(thisObject) {
     console.log("Alice Solvent", (await thisObject.pairHelper.contract.isSolvent(thisObject.alice.address, false)).toString())
 }
 
-describe("KashiPair Basic", function () {
+describe("KushoPair Basic", function () {
     before(async function () {
         fixture = await createFixture(deployments, this, async (cmd) => {
             await cmd.deploy("weth9", "WETH9Mock")
-            await cmd.deploy("bentoBox", "BentoBoxMock", this.weth9.address)
+            await cmd.deploy("antiqueBox", "AntiqueBoxMock", this.weth9.address)
 
             await cmd.addToken("a", "Token A", "A", 18, this.ReturnFalseERC20Mock)
             await cmd.addToken("b", "Token B", "B", 8, this.RevertingERC20Mock)
-            await cmd.addPair("sushiSwapPair", this.a, this.b, 50000, 50000)
+            await cmd.addPair("polyCityDexPair", this.a, this.b, 50000, 50000)
 
-            await cmd.deploy("strategy", "SimpleStrategyMock", this.bentoBox.address, this.a.address)
+            await cmd.deploy("strategy", "SimpleStrategyMock", this.antiqueBox.address, this.a.address)
 
-            await this.bentoBox.setStrategy(this.a.address, this.strategy.address)
+            await this.antiqueBox.setStrategy(this.a.address, this.strategy.address)
             await advanceTime(1209600, ethers)
-            await this.bentoBox.setStrategy(this.a.address, this.strategy.address)
-            await this.bentoBox.setStrategyTargetPercentage(this.a.address, 20)
+            await this.antiqueBox.setStrategy(this.a.address, this.strategy.address)
+            await this.antiqueBox.setStrategyTargetPercentage(this.a.address, 20)
 
             await cmd.deploy("erc20", "ERC20Mock", 10000000)
-            await cmd.deploy("kashiPair", "KashiPairMock", this.bentoBox.address)
+            await cmd.deploy("kushoPair", "KushoPairMock", this.antiqueBox.address)
             await cmd.deploy("oracle", "OracleMock")
-            await cmd.deploy("swapper", "SushiSwapSwapper", this.bentoBox.address, this.factory.address, await this.factory.pairCodeHash())
-            await this.kashiPair.setSwapper(this.swapper.address, true)
-            await this.kashiPair.setFeeTo(this.alice.address)
+            await cmd.deploy("swapper", "PolyCityDexSwapper", this.antiqueBox.address, this.factory.address, await this.factory.pairCodeHash())
+            await this.kushoPair.setSwapper(this.swapper.address, true)
+            await this.kushoPair.setFeeTo(this.alice.address)
 
             await this.oracle.set(getBigNumber(1, 28))
             const oracleData = await this.oracle.getDataParameter()
 
-            await cmd.addKashiPair("pairHelper", this.bentoBox, this.kashiPair, this.a, this.b, this.oracle, oracleData)
+            await cmd.addKushoPair("pairHelper", this.antiqueBox, this.kushoPair, this.a, this.b, this.oracle, oracleData)
 
-            // Two different ways to approve the kashiPair
-            await setMasterContractApproval(this.bentoBox, this.alice, this.alice, this.alicePrivateKey, this.kashiPair.address, true)
-            await setMasterContractApproval(this.bentoBox, this.bob, this.bob, this.bobPrivateKey, this.kashiPair.address, true)
+            // Two different ways to approve the kushoPair
+            await setMasterContractApproval(this.antiqueBox, this.alice, this.alice, this.alicePrivateKey, this.kushoPair.address, true)
+            await setMasterContractApproval(this.antiqueBox, this.bob, this.bob, this.bobPrivateKey, this.kushoPair.address, true)
 
-            await this.a.connect(this.fred).approve(this.bentoBox.address, getBigNumber(130))
-            await expect(this.bentoBox.connect(this.fred).deposit(this.a.address, this.fred.address, this.fred.address, getBigNumber(100), 0))
+            await this.a.connect(this.fred).approve(this.antiqueBox.address, getBigNumber(130))
+            await expect(this.antiqueBox.connect(this.fred).deposit(this.a.address, this.fred.address, this.fred.address, getBigNumber(100), 0))
                 .to.emit(this.a, "Transfer")
-                .withArgs(this.fred.address, this.bentoBox.address, getBigNumber(100))
-                .to.emit(this.bentoBox, "LogDeposit")
+                .withArgs(this.fred.address, this.antiqueBox.address, getBigNumber(100))
+                .to.emit(this.antiqueBox, "LogDeposit")
                 .withArgs(this.a.address, this.fred.address, this.fred.address, getBigNumber(100), getBigNumber(100))
 
-            await this.bentoBox.connect(this.fred).addProfit(this.a.address, getBigNumber(30))
+            await this.antiqueBox.connect(this.fred).addProfit(this.a.address, getBigNumber(30))
 
-            await this.b.connect(this.fred).approve(this.bentoBox.address, getBigNumber(400, 8))
-            await expect(this.bentoBox.connect(this.fred).deposit(this.b.address, this.fred.address, this.fred.address, getBigNumber(200, 8), 0))
+            await this.b.connect(this.fred).approve(this.antiqueBox.address, getBigNumber(400, 8))
+            await expect(this.antiqueBox.connect(this.fred).deposit(this.b.address, this.fred.address, this.fred.address, getBigNumber(200, 8), 0))
                 .to.emit(this.b, "Transfer")
-                .withArgs(this.fred.address, this.bentoBox.address, getBigNumber(200, 8))
-                .to.emit(this.bentoBox, "LogDeposit")
+                .withArgs(this.fred.address, this.antiqueBox.address, getBigNumber(200, 8))
+                .to.emit(this.antiqueBox, "LogDeposit")
                 .withArgs(this.b.address, this.fred.address, this.fred.address, getBigNumber(200, 8), getBigNumber(200, 8))
 
-            await this.bentoBox.connect(this.fred).addProfit(this.b.address, getBigNumber(200, 8))
+            await this.antiqueBox.connect(this.fred).addProfit(this.b.address, getBigNumber(200, 8))
         })
     })
 
@@ -104,7 +104,7 @@ describe("KashiPair Basic", function () {
 
     describe("Deployment", function () {
         it("Assigns a name", async function () {
-            expect(await this.pairHelper.contract.name()).to.be.equal("Kashi Medium Risk Token A/Token B-Test")
+            expect(await this.pairHelper.contract.name()).to.be.equal("Kusho Medium Risk Token A/Token B-Test")
         })
         it("Assigns a symbol", async function () {
             expect(await this.pairHelper.contract.symbol()).to.be.equal("kmA/B-TEST")
@@ -123,12 +123,12 @@ describe("KashiPair Basic", function () {
         it("Reverts init for collateral address 0", async function () {
             const oracleData = await this.oracle.getDataParameter()
             await expect(
-                cmd.addKashiPair("pairHelper", this.bentoBox, this.kashiPair, ADDRESS_ZERO, this.b, this.oracle, oracleData)
-            ).to.be.revertedWith("KashiPair: bad pair")
+                cmd.addKushoPair("pairHelper", this.antiqueBox, this.kushoPair, ADDRESS_ZERO, this.b, this.oracle, oracleData)
+            ).to.be.revertedWith("KushoPair: bad pair")
         })
 
         it("Reverts init for initilised pair", async function () {
-            await expect(this.pairHelper.contract.init(this.pairHelper.initData)).to.be.revertedWith("KashiPair: already initialized")
+            await expect(this.pairHelper.contract.init(this.pairHelper.initData)).to.be.revertedWith("KushoPair: already initialized")
         })
     })
 
@@ -273,34 +273,34 @@ describe("KashiPair Basic", function () {
 
     describe("Add Asset", function () {
         it("should add asset with skim", async function () {
-            await this.b.approve(this.bentoBox.address, getBigNumber(2, 8))
-            await this.bentoBox.deposit(this.b.address, this.alice.address, this.alice.address, 0, getBigNumber(1, 8))
-            await this.bentoBox.transfer(this.b.address, this.alice.address, this.pairHelper.contract.address, getBigNumber(1, 8))
+            await this.b.approve(this.antiqueBox.address, getBigNumber(2, 8))
+            await this.antiqueBox.deposit(this.b.address, this.alice.address, this.alice.address, 0, getBigNumber(1, 8))
+            await this.antiqueBox.transfer(this.b.address, this.alice.address, this.pairHelper.contract.address, getBigNumber(1, 8))
             await this.pairHelper.run((cmd) => [cmd.do(this.pairHelper.contract.addAsset, this.alice.address, true, getBigNumber(1, 8))])
             expect(await this.pairHelper.contract.balanceOf(this.alice.address)).to.be.equal(getBigNumber(1, 8))
         })
 
         it("should revert when trying to skim too much", async function () {
-            await this.b.approve(this.bentoBox.address, getBigNumber(2))
-            await this.bentoBox.deposit(this.b.address, this.alice.address, this.alice.address, 0, getBigNumber(1, 8))
-            await this.bentoBox.transfer(this.b.address, this.alice.address, this.pairHelper.contract.address, getBigNumber(1, 8))
+            await this.b.approve(this.antiqueBox.address, getBigNumber(2))
+            await this.antiqueBox.deposit(this.b.address, this.alice.address, this.alice.address, 0, getBigNumber(1, 8))
+            await this.antiqueBox.transfer(this.b.address, this.alice.address, this.pairHelper.contract.address, getBigNumber(1, 8))
             await expect(
                 this.pairHelper.run((cmd) => [cmd.do(this.pairHelper.contract.addAsset, this.alice.address, true, getBigNumber(2, 8))])
-            ).to.be.revertedWith("KashiPair: Skim too much")
+            ).to.be.revertedWith("KushoPair: Skim too much")
         })
 
         it("should revert if MasterContract is not approved", async function () {
-            await this.b.connect(this.carol).approve(this.bentoBox.address, 300)
-            await expect((await this.pairHelper.as(this.carol)).depositAsset(290)).to.be.revertedWith("BentoBox: Transfer not approved")
+            await this.b.connect(this.carol).approve(this.antiqueBox.address, 300)
+            await expect((await this.pairHelper.as(this.carol)).depositAsset(290)).to.be.revertedWith("AntiqueBox: Transfer not approved")
         })
 
-        it("should take a deposit of assets from BentoBox", async function () {
+        it("should take a deposit of assets from AntiqueBox", async function () {
             await this.pairHelper.run((cmd) => [cmd.approveAsset(3000), cmd.depositAsset(3000)])
             expect(await this.pairHelper.contract.balanceOf(this.alice.address)).to.be.equal(1500)
         })
 
         it("should emit correct event on adding asset", async function () {
-            await this.b.approve(this.bentoBox.address, 3000)
+            await this.b.approve(this.antiqueBox.address, 3000)
             await expect(this.pairHelper.depositAsset(2900))
                 .to.emit(this.pairHelper.contract, "LogAddAsset")
                 .withArgs(this.alice.address, this.alice.address, 1450, 1450)
@@ -326,7 +326,7 @@ describe("KashiPair Basic", function () {
 
     describe("Add Collateral", function () {
         it("should take a deposit of collateral", async function () {
-            await this.a.approve(this.bentoBox.address, 300)
+            await this.a.approve(this.antiqueBox.address, 300)
             await expect(this.pairHelper.depositCollateral(290))
                 .to.emit(this.pairHelper.contract, "LogAddCollateral")
                 .withArgs(this.alice.address, this.alice.address, 223)
@@ -344,7 +344,7 @@ describe("KashiPair Basic", function () {
                 cmd.depositCollateral(getBigNumber(100)),
                 cmd.do(this.pairHelper.contract.removeCollateral, this.alice.address, getBigNumber(50)),
             ])
-            expect(await this.bentoBox.balanceOf(this.a.address, this.alice.address)).to.be.equal(getBigNumber(50))
+            expect(await this.antiqueBox.balanceOf(this.a.address, this.alice.address)).to.be.equal(getBigNumber(50))
         })
 
         it("should not allow a remove of collateral if user is insolvent", async function () {
@@ -357,7 +357,7 @@ describe("KashiPair Basic", function () {
                 cmd.do(this.pairHelper.contract.accrue),
             ])
 
-            await expect(this.pairHelper.withdrawCollateral(getBigNumber(1, 0))).to.be.revertedWith("KashiPair: user insolvent")
+            await expect(this.pairHelper.withdrawCollateral(getBigNumber(1, 0))).to.be.revertedWith("KushoPair: user insolvent")
         })
 
         it("should allow to partial withdrawal of collateral", async function () {
@@ -395,14 +395,14 @@ describe("KashiPair Basic", function () {
 
     describe("Borrow", function () {
         it("should not allow borrowing without any assets", async function () {
-            await expect(this.pairHelper.contract.borrow(this.alice.address, 10000)).to.be.revertedWith("Kashi: below minimum")
-            await expect(this.pairHelper.contract.borrow(this.alice.address, 1)).to.be.revertedWith("Kashi: below minimum")
+            await expect(this.pairHelper.contract.borrow(this.alice.address, 10000)).to.be.revertedWith("Kusho: below minimum")
+            await expect(this.pairHelper.contract.borrow(this.alice.address, 1)).to.be.revertedWith("Kusho: below minimum")
         })
 
         it("should not allow borrowing without any collateral", async function () {
-            await this.b.approve(this.bentoBox.address, 300)
+            await this.b.approve(this.antiqueBox.address, 300)
             await await this.pairHelper.depositAsset(290)
-            await expect(this.pairHelper.contract.borrow(this.alice.address, 1)).to.be.revertedWith("Kashi: below minimum")
+            await expect(this.pairHelper.contract.borrow(this.alice.address, 1)).to.be.revertedWith("Kusho: below minimum")
         })
 
         it("should allow borrowing with collateral up to 75%", async function () {
@@ -470,14 +470,14 @@ describe("KashiPair Basic", function () {
             ])
         })
 
-        it("should allow to repay from BentoBox", async function () {
+        it("should allow to repay from AntiqueBox", async function () {
             await this.pairHelper.run((cmd) => [
                 cmd.approveAsset(getBigNumber(700, 8)),
                 cmd.depositAsset(getBigNumber(290, 8)),
                 cmd.approveCollateral(getBigNumber(100)),
                 cmd.depositCollateral(getBigNumber(100)),
                 cmd.borrow(sansBorrowFee(getBigNumber(75, 8))),
-                cmd.do(this.bentoBox.deposit, this.b.address, this.alice.address, this.alice.address, getBigNumber(70, 8), 0),
+                cmd.do(this.antiqueBox.deposit, this.b.address, this.alice.address, this.alice.address, getBigNumber(70, 8), 0),
                 cmd.do(this.pairHelper.contract.repay, this.alice.address, false, getBigNumber(50, 8)),
             ])
         })
@@ -510,7 +510,7 @@ describe("KashiPair Basic", function () {
                     cmd.depositCollateral(getBigNumber(100)),
                     cmd.short(this.swapper, getBigNumber(200, 8), getBigNumber(200)),
                 ])
-            ).to.be.revertedWith("KashiPair: call failed")
+            ).to.be.revertedWith("KushoPair: call failed")
         })
 
         it("should not allow shorting into insolvency", async function () {
@@ -525,7 +525,7 @@ describe("KashiPair Basic", function () {
                     // Alice shorts by borrowing 500 assets shares for at least 50 shares collateral
                     cmd.short(this.swapper, getBigNumber(400, 8), getBigNumber(50)),
                 ])
-            ).to.be.revertedWith("KashiPair: user insolvent")
+            ).to.be.revertedWith("KushoPair: user insolvent")
         })
 
         it("should allow shorting", async function () {
@@ -545,7 +545,7 @@ describe("KashiPair Basic", function () {
             // Alice borrows 250 asset and deposits 230+ collateral
             await this.pairHelper.run((cmd) => [
                 cmd.approveAsset(getBigNumber(1, 8)),
-                cmd.depositAsset(getBigNumber(1, 8)), // Just a minimum balance for the BentoBox
+                cmd.depositAsset(getBigNumber(1, 8)), // Just a minimum balance for the AntiqueBox
                 cmd.as(this.bob).approveAsset(getBigNumber(1000, 8)),
                 cmd.as(this.bob).depositAsset(getBigNumber(1000, 8)),
                 cmd.approveCollateral(getBigNumber(100)),
@@ -581,7 +581,7 @@ describe("KashiPair Basic", function () {
 
     describe("Cook", function () {
         it("can add 2 values to a call and receive 1 value back", async function () {
-            const ACTION_BENTO_DEPOSIT = 20
+            const ACTION_ANTIQUE_DEPOSIT = 20
             const ACTION_CALL = 30
 
             await cmd.deploy("externalFunctionMock", "ExternalFunctionMock")
@@ -592,7 +592,7 @@ describe("KashiPair Basic", function () {
 
             await expect(
                 this.pairHelper.contract.cook(
-                    [ACTION_BENTO_DEPOSIT, ACTION_CALL, ACTION_BENTO_DEPOSIT],
+                    [ACTION_ANTIQUE_DEPOSIT, ACTION_CALL, ACTION_ANTIQUE_DEPOSIT],
                     [0, 0, 0],
                     [
                         defaultAbiCoder.encode(
@@ -611,18 +611,18 @@ describe("KashiPair Basic", function () {
                 .withArgs(getBigNumber(375, 7))
 
             // (25 / 2) + (37.5 / 2) = 31.25
-            expect(await this.bentoBox.balanceOf(this.b.address, this.alice.address)).to.be.equal("3125000000")
+            expect(await this.antiqueBox.balanceOf(this.b.address, this.alice.address)).to.be.equal("3125000000")
         })
 
-        it("reverts on a call to the BentoBox", async function () {
+        it("reverts on a call to the AntiqueBox", async function () {
             const ACTION_CALL = 30
             await expect(
                 this.pairHelper.contract.cook(
                     [ACTION_CALL],
                     [0],
-                    [defaultAbiCoder.encode(["address", "bytes", "bool", "bool", "uint8"], [this.bentoBox.address, "0x", false, false, 0])]
+                    [defaultAbiCoder.encode(["address", "bytes", "bool", "bool", "uint8"], [this.antiqueBox.address, "0x", false, false, 0])]
                 )
-            ).to.be.revertedWith("KashiPair: can't call")
+            ).to.be.revertedWith("KushoPair: can't call")
         })
 
         it("takes else path", async function () {
@@ -645,25 +645,25 @@ describe("KashiPair Basic", function () {
             await this.pairHelper.contract.cook([ACTION_GET_REPAY_PART], [0], [defaultAbiCoder.encode(["int256"], [1])])
         })
 
-        it("executed Bento transfer multiple", async function () {
+        it("executed Antique transfer multiple", async function () {
             await this.pairHelper.run((cmd) => [
                 cmd.approveAsset(getBigNumber(100, 8)),
-                cmd.do(this.bentoBox.deposit, this.b.address, this.alice.address, this.alice.address, getBigNumber(70, 8), 0),
+                cmd.do(this.antiqueBox.deposit, this.b.address, this.alice.address, this.alice.address, getBigNumber(70, 8), 0),
             ])
-            const ACTION_BENTO_TRANSFER_MULTIPLE = 23
+            const ACTION_ANTIQUE_TRANSFER_MULTIPLE = 23
             await this.pairHelper.contract.cook(
-                [ACTION_BENTO_TRANSFER_MULTIPLE],
+                [ACTION_ANTIQUE_TRANSFER_MULTIPLE],
                 [0],
                 [defaultAbiCoder.encode(["address", "address[]", "uint256[]"], [this.b.address, [this.carol.address], [getBigNumber(10, 8)]])]
             )
         })
 
         it("allows to addAsset with approval", async function () {
-            const nonce = await this.bentoBox.nonces(this.alice.address)
+            const nonce = await this.antiqueBox.nonces(this.alice.address)
             await expect(
                 await this.pairHelper.run((cmd) => [
                     cmd.approveAsset(getBigNumber(100, 8)),
-                    cmd.depositAssetWithApproval(getBigNumber(100, 8), this.kashiPair, this.alicePrivateKey, nonce),
+                    cmd.depositAssetWithApproval(getBigNumber(100, 8), this.kushoPair, this.alicePrivateKey, nonce),
                 ])
             )
         })
@@ -678,14 +678,14 @@ describe("KashiPair Basic", function () {
                 cmd.depositCollateral(getBigNumber(100)),
                 cmd.borrow(sansBorrowFee(getBigNumber(75, 8))),
                 cmd.accrue(),
-                cmd.do(this.bentoBox.connect(this.bob).deposit, this.b.address, this.bob.address, this.bob.address, getBigNumber(20, 8), 0),
+                cmd.do(this.antiqueBox.connect(this.bob).deposit, this.b.address, this.bob.address, this.bob.address, getBigNumber(20, 8), 0),
             ])
 
             await expect(
                 this.pairHelper.contract
                     .connect(this.bob)
                     .liquidate([this.alice.address], [getBigNumber(20, 8)], this.bob.address, "0x0000000000000000000000000000000000000000", true)
-            ).to.be.revertedWith("KashiPair: all are solvent")
+            ).to.be.revertedWith("KushoPair: all are solvent")
         })
 
         it("should allow open liquidate", async function () {
@@ -698,7 +698,7 @@ describe("KashiPair Basic", function () {
                 cmd.accrue(),
                 cmd.do(this.oracle.set, "11000000000000000000000000000"),
                 cmd.updateExchangeRate(),
-                cmd.do(this.bentoBox.connect(this.bob).deposit, this.b.address, this.bob.address, this.bob.address, getBigNumber(20, 8), 0),
+                cmd.do(this.antiqueBox.connect(this.bob).deposit, this.b.address, this.bob.address, this.bob.address, getBigNumber(20, 8), 0),
                 cmd.do(this.pairHelper.contract.connect(this.bob).removeAsset, this.bob.address, getBigNumber(50, 8)),
             ])
             await this.pairHelper.contract
@@ -716,7 +716,7 @@ describe("KashiPair Basic", function () {
                 cmd.accrue(),
                 cmd.do(this.oracle.set, "11000000000000000000000000000"),
                 cmd.updateExchangeRate(),
-                cmd.do(this.bentoBox.connect(this.bob).deposit, this.b.address, this.bob.address, this.bob.address, getBigNumber(20, 8), 0),
+                cmd.do(this.antiqueBox.connect(this.bob).deposit, this.b.address, this.bob.address, this.bob.address, getBigNumber(20, 8), 0),
             ])
             await expect(
                 this.pairHelper.contract
@@ -740,8 +740,8 @@ describe("KashiPair Basic", function () {
                 cmd.accrue(),
                 // Change oracle to put Alice into insolvency
                 cmd.do(this.oracle.set, "11000000000000000000000000000"),
-                //cmd.do(this.a.transfer, this.sushiSwapPair.address, getBigNumber(500)),
-                //cmd.do(this.sushiSwapPair.sync),
+                //cmd.do(this.a.transfer, this.polyCityDexPair.address, getBigNumber(500)),
+                //cmd.do(this.polyCityDexPair.sync),
                 cmd.updateExchangeRate(),
             ])
 
@@ -763,8 +763,8 @@ describe("KashiPair Basic", function () {
 
             await cmd.deploy(
                 "invalidSwapper",
-                "SushiSwapSwapper",
-                this.bentoBox.address,
+                "PolyCityDexSwapper",
+                this.antiqueBox.address,
                 this.factory.address,
                 await this.factory.pairCodeHash()
             )
@@ -772,7 +772,7 @@ describe("KashiPair Basic", function () {
                 this.pairHelper.contract
                     .connect(this.bob)
                     .liquidate([this.alice.address], [getBigNumber(20, 8)], this.invalidSwapper.address, this.invalidSwapper.address, false)
-            ).to.be.revertedWith("KashiPair: Invalid swapper")
+            ).to.be.revertedWith("KushoPair: Invalid swapper")
         })
     })
 
@@ -811,17 +811,17 @@ describe("KashiPair Basic", function () {
 
     describe("Set Fee To", function () {
         it("Mutates fee to", async function () {
-            await this.kashiPair.setFeeTo(this.bob.address)
-            expect(await this.kashiPair.feeTo()).to.be.equal(this.bob.address)
+            await this.kushoPair.setFeeTo(this.bob.address)
+            expect(await this.kushoPair.feeTo()).to.be.equal(this.bob.address)
             expect(await this.pairHelper.contract.feeTo()).to.be.equal(ADDRESS_ZERO)
         })
 
         it("Emit LogFeeTo event if dev attempts to set fee to", async function () {
-            await expect(this.kashiPair.setFeeTo(this.bob.address)).to.emit(this.kashiPair, "LogFeeTo").withArgs(this.bob.address)
+            await expect(this.kushoPair.setFeeTo(this.bob.address)).to.emit(this.kushoPair, "LogFeeTo").withArgs(this.bob.address)
         })
 
         it("Reverts if non-owner attempts to set fee to", async function () {
-            await expect(this.kashiPair.connect(this.bob).setFeeTo(this.bob.address)).to.be.revertedWith("caller is not the owner")
+            await expect(this.kushoPair.connect(this.bob).setFeeTo(this.bob.address)).to.be.revertedWith("caller is not the owner")
             await expect(this.pairHelper.contract.connect(this.bob).setFeeTo(this.bob.address)).to.be.revertedWith("caller is not the owner")
         })
     })

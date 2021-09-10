@@ -1,53 +1,53 @@
 const { ethers, deployments } = require("hardhat")
-const { getBigNumber, advanceBlock, advanceTime, setMasterContractApproval, createFixture, KashiPair } = require("@sushiswap/hardhat-framework")
-const KashiPairStateMachine = require("./KashiPairStateMachine.js")
+const { getBigNumber, advanceBlock, advanceTime, setMasterContractApproval, createFixture, KushoPair } = require("@polycity/hardhat-framework")
+const KushoPairStateMachine = require("./KushoPairStateMachine.js")
 
-describe("KashiPair", function () {
+describe("KushoPair", function () {
     let cmd, fixture
 
     before(async function () {
         fixture = await createFixture(deployments, this, async (cmd) => {
             await cmd.deploy("weth9", "WETH9Mock")
-            await cmd.deploy("bentoBox", "BentoBoxMock", this.weth9.address)
+            await cmd.deploy("antiqueBox", "AntiqueBoxMock", this.weth9.address)
 
             await cmd.addToken("collateralToken", "Token A", "A", 18, this.ReturnFalseERC20Mock)
             await cmd.addToken("assetToken", "Token B", "B", 8, this.RevertingERC20Mock)
-            await cmd.addPair("sushiSwapPair", this.collateralToken, this.assetToken, 50000, 50000)
+            await cmd.addPair("polyCityDexPair", this.collateralToken, this.assetToken, 50000, 50000)
 
-            await cmd.deploy("kashiPair", "KashiPair", this.bentoBox.address)
+            await cmd.deploy("kushoPair", "KushoPair", this.antiqueBox.address)
             await cmd.deploy("oracle", "OracleMock")
-            await cmd.deploy("swapper", "SushiSwapSwapper", this.bentoBox.address, this.factory.address, await this.factory.pairCodeHash())
-            await this.kashiPair.setSwapper(this.swapper.address, true)
-            await this.kashiPair.setFeeTo(this.alice.address)
+            await cmd.deploy("swapper", "PolyCityDexSwapper", this.antiqueBox.address, this.factory.address, await this.factory.pairCodeHash())
+            await this.kushoPair.setSwapper(this.swapper.address, true)
+            await this.kushoPair.setFeeTo(this.alice.address)
 
             await this.oracle.set(getBigNumber(1, 28))
             const oracleData = await this.oracle.getDataParameter()
 
-            await cmd.addKashiPair("pairHelper", this.bentoBox, this.kashiPair, this.collateralToken, this.assetToken, this.oracle, oracleData)
+            await cmd.addKushoPair("pairHelper", this.antiqueBox, this.kushoPair, this.collateralToken, this.assetToken, this.oracle, oracleData)
 
             await cmd.deploy(
                 "strategy",
                 "FlashloanStrategyMock",
-                this.bentoBox.address,
+                this.antiqueBox.address,
                 this.pairHelper.contract.address,
                 this.assetToken.address,
                 this.collateralToken.address,
                 this.swapper.address,
                 this.factory.address
             )
-            await this.bentoBox.setStrategy(this.assetToken.address, this.strategy.address)
+            await this.antiqueBox.setStrategy(this.assetToken.address, this.strategy.address)
             await advanceTime(1209600, ethers)
-            await this.bentoBox.setStrategy(this.assetToken.address, this.strategy.address)
-            await this.bentoBox.setStrategyTargetPercentage(this.assetToken.address, 20)
+            await this.antiqueBox.setStrategy(this.assetToken.address, this.strategy.address)
+            await this.antiqueBox.setStrategyTargetPercentage(this.assetToken.address, 20)
 
-            // Two different ways to approve the kashiPair
-            await setMasterContractApproval(this.bentoBox, this.alice, this.alice, this.alicePrivateKey, this.kashiPair.address, true)
-            await setMasterContractApproval(this.bentoBox, this.bob, this.bob, this.bobPrivateKey, this.kashiPair.address, true)
+            // Two different ways to approve the kushoPair
+            await setMasterContractApproval(this.antiqueBox, this.alice, this.alice, this.alicePrivateKey, this.kushoPair.address, true)
+            await setMasterContractApproval(this.antiqueBox, this.bob, this.bob, this.bobPrivateKey, this.kushoPair.address, true)
 
         })
     })
 
-    describe("KashiPairStateMachine", function () {
+    describe("KushoPairStateMachine", function () {
         const DEPOSIT_AMOUNT = 1000
 
         before(async function () {
@@ -55,9 +55,9 @@ describe("KashiPair", function () {
         })
 
         it("Setup state machine", async function () {
-            this.stateMachine = new KashiPairStateMachine({
-                kashiPair: this.pairHelper.contract,
-                bentoBox: this.bentoBox,
+            this.stateMachine = new KushoPairStateMachine({
+                kushoPair: this.pairHelper.contract,
+                antiqueBox: this.antiqueBox,
             })
             await this.stateMachine.init()
         })
@@ -67,19 +67,19 @@ describe("KashiPair", function () {
         })
 
         it("Approvals for deposit", async function () {
-            await this.collateralToken.approve(this.bentoBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.collateralToken.decimals()))
-            await this.assetToken.approve(this.bentoBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.assetToken.decimals()))
+            await this.collateralToken.approve(this.antiqueBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.collateralToken.decimals()))
+            await this.assetToken.approve(this.antiqueBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.assetToken.decimals()))
         })
 
         it("deposit", async function () {
-            await this.bentoBox.deposit(
+            await this.antiqueBox.deposit(
                 this.collateralToken.address,
                 this.alice.address,
                 this.alice.address,
                 0,
                 getBigNumber(DEPOSIT_AMOUNT, await this.collateralToken.decimals())
             )
-            await this.bentoBox.deposit(
+            await this.antiqueBox.deposit(
                 this.assetToken.address,
                 this.alice.address,
                 this.alice.address,
@@ -123,19 +123,19 @@ describe("KashiPair", function () {
 
         describe("skim", function () {
             it("Approvals for deposit", async function () {
-                await this.collateralToken.approve(this.bentoBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.collateralToken.decimals()))
-                await this.assetToken.approve(this.bentoBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.assetToken.decimals()))
+                await this.collateralToken.approve(this.antiqueBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.collateralToken.decimals()))
+                await this.assetToken.approve(this.antiqueBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.assetToken.decimals()))
             })
 
             it("deposit", async function () {
-                await this.bentoBox.deposit(
+                await this.antiqueBox.deposit(
                     this.collateralToken.address,
                     this.alice.address,
                     this.pairHelper.contract.address,
                     0,
                     getBigNumber(DEPOSIT_AMOUNT, await this.collateralToken.decimals())
                 )
-                await this.bentoBox.deposit(
+                await this.antiqueBox.deposit(
                     this.assetToken.address,
                     this.alice.address,
                     this.pairHelper.contract.address,
@@ -197,8 +197,8 @@ describe("KashiPair", function () {
             it("deposit collateral", async function () {
                 await this.assetToken
                     .connect(this.bob)
-                    .approve(this.bentoBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.assetToken.decimals()))
-                await this.bentoBox
+                    .approve(this.antiqueBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.assetToken.decimals()))
+                await this.antiqueBox
                     .connect(this.bob)
                     .deposit(
                         this.assetToken.address,
@@ -233,19 +233,19 @@ describe("KashiPair", function () {
             const HARVEST_MAX_AMOUNT = 1
 
             it("Approvals for deposit", async function () {
-                await this.collateralToken.approve(this.bentoBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.collateralToken.decimals()))
-                await this.assetToken.approve(this.bentoBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.assetToken.decimals()))
+                await this.collateralToken.approve(this.antiqueBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.collateralToken.decimals()))
+                await this.assetToken.approve(this.antiqueBox.address, getBigNumber(DEPOSIT_AMOUNT, await this.assetToken.decimals()))
             })
 
             it("deposit", async function () {
-                await this.bentoBox.deposit(
+                await this.antiqueBox.deposit(
                     this.collateralToken.address,
                     this.alice.address,
                     this.alice.address,
                     0,
                     getBigNumber(DEPOSIT_AMOUNT, await this.collateralToken.decimals())
                 )
-                await this.bentoBox.deposit(
+                await this.antiqueBox.deposit(
                     this.assetToken.address,
                     this.alice.address,
                     this.alice.address,
@@ -270,12 +270,12 @@ describe("KashiPair", function () {
                 await this.oracle.set(getBigNumber(20, 28))
             })
 
-            it("whitelist kashiPair", async function () {
-                await this.bentoBox.whitelistMasterContract(this.kashiPair.address, true)
+            it("whitelist kushoPair", async function () {
+                await this.antiqueBox.whitelistMasterContract(this.kushoPair.address, true)
             })
 
             it("harvest", async function () {
-                await this.bentoBox.harvest(this.assetToken.address, true, HARVEST_MAX_AMOUNT)
+                await this.antiqueBox.harvest(this.assetToken.address, true, HARVEST_MAX_AMOUNT)
             })
         })
     })

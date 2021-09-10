@@ -8,32 +8,32 @@ interface IAggregator {
     function latestAnswer() external view returns (int256 answer);
 }
 
-/// @title xSUSHIOracle
+/// @title xPICHIOracle
 /// @author BoringCrypto
-/// @notice Oracle used for getting the price of xSUSHI based on Chainlink
+/// @notice Oracle used for getting the price of xPICHI based on Chainlink
 /// @dev
-contract xSUSHIOracle is IOracle {
+contract xPICHIOracle is IOracle {
     using BoringMath for uint256; // Keep everything in uint256
 
-    IERC20 public immutable sushi;
-    IERC20 public immutable bar;
-    IAggregator public immutable sushiOracle;
+    IERC20 public immutable pichi;
+    IERC20 public immutable hall;
+    IAggregator public immutable pichiOracle;
 
     constructor(
-        IERC20 sushi_,
-        IERC20 bar_,
-        IAggregator sushiOracle_
+        IERC20 pichi_,
+        IERC20 hall_,
+        IAggregator pichiOracle_
     ) public {
-        sushi = sushi_;
-        bar = bar_;
-        sushiOracle = sushiOracle_;
+        pichi = pichi_;
+        hall = hall_;
+        pichiOracle = pichiOracle_;
     }
 
     // Calculates the lastest exchange rate
-    // Uses sushi rate and xSUSHI conversion and divide for any conversion other than from SUSHI to ETH
+    // Uses pichi rate and xPICHI conversion and divide for any conversion other than from PICHI to ETH
     function _get(address divide, uint256 decimals) internal view returns (uint256) {
         uint256 price = uint256(1e36);
-        price = (price.mul(uint256(sushiOracle.latestAnswer())) / bar.totalSupply()).mul(sushi.balanceOf(address(bar)));
+        price = (price.mul(uint256(pichiOracle.latestAnswer())) / hall.totalSupply()).mul(pichi.balanceOf(address(hall)));
 
         if (divide != address(0)) {
             price = price / uint256(IAggregator(divide).latestAnswer());
@@ -68,11 +68,11 @@ contract xSUSHIOracle is IOracle {
 
     /// @inheritdoc IOracle
     function name(bytes calldata) public view override returns (string memory) {
-        return "xSUSHI Chainlink";
+        return "xPICHI Chainlink";
     }
 
     /// @inheritdoc IOracle
     function symbol(bytes calldata) public view override returns (string memory) {
-        return "xSUSHI-LINK";
+        return "xPICHI-LINK";
     }
 }

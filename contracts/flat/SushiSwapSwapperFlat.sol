@@ -22,13 +22,13 @@ library BoringMath {
     }
 }
 
-// File @sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol@v1.4.2
+// File @polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Factory.sol@v1.4.2
 // License-Identifier: GPL-3.0
 interface IUniswapV2Factory {
     function getPair(address tokenA, address tokenB) external view returns (address pair);
 }
 
-// File @sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol@v1.4.2
+// File @polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol@v1.4.2
 // License-Identifier: GPL-3.0
 interface IUniswapV2Pair {
     function token0() external view returns (address);
@@ -56,9 +56,9 @@ interface IERC20 {
 
 }
 
-// File @sushiswap/bentobox-sdk/contracts/IBentoBoxV1.sol@v1.0.0
+// File @polycity/antiquebox-sdk/contracts/IAntiqueBoxV1.sol@v1.0.0
 // License-Identifier: MIT
-interface IBentoBoxV1 {
+interface IAntiqueBoxV1 {
     function deposit(
         IERC20 token_,
         address from,
@@ -95,22 +95,22 @@ interface IBentoBoxV1 {
     ) external returns (uint256 amountOut, uint256 shareOut);
 }
 
-// File contracts/swappers/SushiSwapSwapper.sol
+// File contracts/swappers/PolyCityDexSwapper.sol
 // License-Identifier: MIT
-contract SushiSwapSwapperV1 {
+contract PolyCityDexSwapperV1 {
     using BoringMath for uint256;
 
     // Local variables
-    IBentoBoxV1 public immutable bentoBox;
+    IAntiqueBoxV1 public immutable antiqueBox;
     IUniswapV2Factory public immutable factory;
     bytes32 public pairCodeHash;
 
     constructor(
-        IBentoBoxV1 bentoBox_,
+        IAntiqueBoxV1 antiqueBox_,
         IUniswapV2Factory factory_,
         bytes32 pairCodeHash_
     ) public {
-        bentoBox = bentoBox_;
+        antiqueBox = antiqueBox_;
         factory = factory_;
         pairCodeHash = pairCodeHash_;
     }
@@ -139,11 +139,11 @@ contract SushiSwapSwapperV1 {
     }
 
     // Swaps to a flexible amount, from an exact input amount
-    /// @notice Withdraws 'amountFrom' of token 'from' from the BentoBox account for this swapper.
+    /// @notice Withdraws 'amountFrom' of token 'from' from the AntiqueBox account for this swapper.
     /// Swaps it for at least 'amountToMin' of token 'to'.
-    /// Transfers the swapped tokens of 'to' into the BentoBox using a plain ERC20 transfer.
-    /// Returns the amount of tokens 'to' transferred to BentoBox.
-    /// (The BentoBox skim function will be used by the caller to get the swapped funds).
+    /// Transfers the swapped tokens of 'to' into the AntiqueBox using a plain ERC20 transfer.
+    /// Returns the amount of tokens 'to' transferred to AntiqueBox.
+    /// (The AntiqueBox skim function will be used by the caller to get the swapped funds).
     function swap(
         IERC20 fromToken,
         IERC20 toToken,
@@ -159,30 +159,30 @@ contract SushiSwapSwapperV1 {
                 )
             );
 
-        (uint256 amountFrom, ) = bentoBox.withdraw(fromToken, address(this), address(pair), 0, shareFrom);
+        (uint256 amountFrom, ) = antiqueBox.withdraw(fromToken, address(this), address(pair), 0, shareFrom);
 
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
         uint256 amountTo;
         if (toToken > fromToken) {
             amountTo = getAmountOut(amountFrom, reserve0, reserve1);
-            pair.swap(0, amountTo, address(bentoBox), new bytes(0));
+            pair.swap(0, amountTo, address(antiqueBox), new bytes(0));
         } else {
             amountTo = getAmountOut(amountFrom, reserve1, reserve0);
-            pair.swap(amountTo, 0, address(bentoBox), new bytes(0));
+            pair.swap(amountTo, 0, address(antiqueBox), new bytes(0));
         }
-        (, shareReturned) = bentoBox.deposit(toToken, address(bentoBox), recipient, amountTo, 0);
+        (, shareReturned) = antiqueBox.deposit(toToken, address(antiqueBox), recipient, amountTo, 0);
         extraShare = shareReturned.sub(shareToMin);
     }
 
     // Swaps to an exact amount, from a flexible input amount
     /// @notice Calculates the amount of token 'from' needed to complete the swap (amountFrom),
     /// this should be less than or equal to amountFromMax.
-    /// Withdraws 'amountFrom' of token 'from' from the BentoBox account for this swapper.
+    /// Withdraws 'amountFrom' of token 'from' from the AntiqueBox account for this swapper.
     /// Swaps it for exactly 'exactAmountTo' of token 'to'.
-    /// Transfers the swapped tokens of 'to' into the BentoBox using a plain ERC20 transfer.
-    /// Transfers allocated, but unused 'from' tokens within the BentoBox to 'refundTo' (amountFromMax - amountFrom).
-    /// Returns the amount of 'from' tokens withdrawn from BentoBox (amountFrom).
-    /// (The BentoBox skim function will be used by the caller to get the swapped funds).
+    /// Transfers the swapped tokens of 'to' into the AntiqueBox using a plain ERC20 transfer.
+    /// Transfers allocated, but unused 'from' tokens within the AntiqueBox to 'refundTo' (amountFromMax - amountFrom).
+    /// Returns the amount of 'from' tokens withdrawn from AntiqueBox (amountFrom).
+    /// (The AntiqueBox skim function will be used by the caller to get the swapped funds).
     function swapExact(
         IERC20 fromToken,
         IERC20 toToken,
@@ -202,22 +202,22 @@ contract SushiSwapSwapperV1 {
         }
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
 
-        uint256 amountToExact = bentoBox.toAmount(toToken, shareToExact, true);
+        uint256 amountToExact = antiqueBox.toAmount(toToken, shareToExact, true);
 
         uint256 amountFrom;
         if (toToken > fromToken) {
             amountFrom = getAmountIn(amountToExact, reserve0, reserve1);
-            (, shareUsed) = bentoBox.withdraw(fromToken, address(this), address(pair), amountFrom, 0);
-            pair.swap(0, amountToExact, address(bentoBox), "");
+            (, shareUsed) = antiqueBox.withdraw(fromToken, address(this), address(pair), amountFrom, 0);
+            pair.swap(0, amountToExact, address(antiqueBox), "");
         } else {
             amountFrom = getAmountIn(amountToExact, reserve1, reserve0);
-            (, shareUsed) = bentoBox.withdraw(fromToken, address(this), address(pair), amountFrom, 0);
-            pair.swap(amountToExact, 0, address(bentoBox), "");
+            (, shareUsed) = antiqueBox.withdraw(fromToken, address(this), address(pair), amountFrom, 0);
+            pair.swap(amountToExact, 0, address(antiqueBox), "");
         }
-        bentoBox.deposit(toToken, address(bentoBox), recipient, 0, shareToExact);
+        antiqueBox.deposit(toToken, address(antiqueBox), recipient, 0, shareToExact);
         shareReturned = shareFromSupplied.sub(shareUsed);
         if (shareReturned > 0) {
-            bentoBox.transfer(fromToken, address(this), refundTo, shareReturned);
+            antiqueBox.transfer(fromToken, address(this), refundTo, shareReturned);
         }
     }
 }

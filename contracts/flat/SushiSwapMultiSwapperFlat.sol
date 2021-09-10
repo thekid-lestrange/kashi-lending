@@ -1,4 +1,4 @@
-// File contracts/swappers/SushiSwapMultiSwapper.sol
+// File contracts/swappers/PolyCityDexMultiSwapper.sol
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
@@ -51,7 +51,7 @@ library BoringMath {
     }
 }
 
-// File @sushiswap/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol@v1.4.2
+// File @polycity/core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol@v1.4.2
 // License-Identifier: GPL-3.0
 
 interface IUniswapV2Pair {
@@ -150,10 +150,10 @@ library UniswapV2Library {
     }
 }
 
-// File @sushiswap/bentobox-sdk/contracts/IBentoBoxV1.sol@v1.0.2
+// File @polycity/antiquebox-sdk/contracts/IAntiqueBoxV1.sol@v1.0.2
 // License-Identifier: MIT
 
-interface IBentoBoxV1 {
+interface IAntiqueBoxV1 {
     function deposit(
         IERC20 token_,
         address from,
@@ -177,24 +177,24 @@ interface IBentoBoxV1 {
     ) external returns (uint256 amountOut, uint256 shareOut);
 }
 
-// File contracts/swappers/SushiSwapMultiSwapper.sol
+// File contracts/swappers/PolyCityDexMultiSwapper.sol
 // License-Identifier: GPL-3.0
 
-contract SushiSwapMultiSwapper {
+contract PolyCityDexMultiSwapper {
     using BoringERC20 for IERC20;
     using BoringMath for uint256;
 
     address private immutable factory;
-    IBentoBoxV1 private immutable bentoBox;
+    IAntiqueBoxV1 private immutable antiqueBox;
     bytes32 private immutable pairCodeHash;
 
     constructor(
         address _factory,
-        IBentoBoxV1 _bentoBox,
+        IAntiqueBoxV1 _antiqueBox,
         bytes32 _pairCodeHash
     ) public {
         factory = _factory;
-        bentoBox = _bentoBox;
+        antiqueBox = _antiqueBox;
         pairCodeHash = _pairCodeHash;
     }
 
@@ -203,7 +203,7 @@ contract SushiSwapMultiSwapper {
         address[] calldata path,
         uint256 shareIn
     ) external view returns (uint256 amountOut) {
-        uint256 amountIn = bentoBox.toAmount(tokenIn, shareIn, false);
+        uint256 amountIn = antiqueBox.toAmount(tokenIn, shareIn, false);
         uint256[] memory amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path, pairCodeHash);
         amountOut = amounts[amounts.length - 1];
     }
@@ -235,9 +235,9 @@ contract SushiSwapMultiSwapper {
             path[3] = address(tokenOut);
         }
         path[0] = address(tokenIn);
-        (uint256 amountIn, ) = bentoBox.withdraw(tokenIn, address(this), UniswapV2Library.pairFor(factory, path[0], path[1], pairCodeHash), 0, shareIn);
-        uint256 amount = _swapExactTokensForTokens(amountIn, amountMinOut, path, address(bentoBox));
-        (, uint256 share) = bentoBox.deposit(tokenOut, address(bentoBox), to, amount, 0);
+        (uint256 amountIn, ) = antiqueBox.withdraw(tokenIn, address(this), UniswapV2Library.pairFor(factory, path[0], path[1], pairCodeHash), 0, shareIn);
+        uint256 amount = _swapExactTokensForTokens(amountIn, amountMinOut, path, address(antiqueBox));
+        (, uint256 share) = antiqueBox.deposit(tokenOut, address(antiqueBox), to, amount, 0);
         return baseShare.add(share);
     }
 

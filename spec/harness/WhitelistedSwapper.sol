@@ -1,11 +1,11 @@
 pragma solidity 0.6.12;
 import "@boringcrypto/boring-solidity/contracts/interfaces/IERC20.sol";
 import "../../contracts/interfaces/ISwapper.sol";
-import "@sushiswap/bentobox-sdk/contracts/IBentoBoxV1.sol";
+import "@polycity/antiquebox-sdk/contracts/IAntiqueBoxV1.sol";
 
 contract WhitelistedSwapper is ISwapper {
     // Local variables
-    IBentoBoxV1 public bentoBox;
+    IAntiqueBoxV1 public antiqueBox;
 
     mapping(uint256 => mapping(uint256 => uint256)) public amountToTransfer;
     
@@ -14,7 +14,7 @@ contract WhitelistedSwapper is ISwapper {
     ) public override returns (uint256 extraAmount, uint256 shareTo) { 
 		shareTo = amountToTransfer[amountToMin][shareFrom];
         require(shareTo >= amountToMin && ( shareTo > 0 || shareFrom == 0 ));
-        bentoBox.transfer(toToken, address(this), address(bentoBox), shareTo);
+        antiqueBox.transfer(toToken, address(this), address(antiqueBox), shareTo);
         extraAmount =  shareTo - amountToMin;
     }
 

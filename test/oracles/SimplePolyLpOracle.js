@@ -1,24 +1,24 @@
 const { ethers } = require("hardhat")
 const { expect } = require("chai")
-const { getBigNumber, roundBN, encodePrice, advanceTime, advanceTimeAndBlock, createFixture } = require("@sushiswap/hardhat-framework")
+const { getBigNumber, roundBN, encodePrice, advanceTime, advanceTimeAndBlock, createFixture } = require("@polycity/hardhat-framework")
 
 describe("SimpleSLPOracle", function () {
     before(async function () {
         fixture = await createFixture(deployments, this, async (cmd) => {
             await cmd.addToken("collateral", "Collateral", "C", 18, this.ReturnFalseERC20Mock)
             await cmd.addToken("asset", "Asset", "A", 18, this.RevertingERC20Mock)
-            await cmd.addPair("sushiSwapPair", this.collateral, this.asset, 5, 10)
+            await cmd.addPair("polyCityDexPair", this.collateral, this.asset, 5, 10)
 
             this.expectedPrice = encodePrice(getBigNumber(5), getBigNumber(10))
 
-            if (this.asset.address == (await this.sushiSwapPair.token0())) {
+            if (this.asset.address == (await this.polyCityDexPair.token0())) {
                 await cmd.deploy("oracleF", "SimpleSLPTWAP0Oracle")
                 await cmd.deploy("oracleB", "SimpleSLPTWAP1Oracle")
             } else {
                 await cmd.deploy("oracleF", "SimpleSLPTWAP1Oracle")
                 await cmd.deploy("oracleB", "SimpleSLPTWAP0Oracle")
             }
-            this.oracleData = await this.oracleF.getDataParameter(this.sushiSwapPair.address)
+            this.oracleData = await this.oracleF.getDataParameter(this.polyCityDexPair.address)
         })
     })
 
@@ -29,8 +29,8 @@ describe("SimpleSLPOracle", function () {
     describe("forward oracle", function () {
         describe("name", function () {
             it("should get name", async function () {
-                expect(await this.oracleF.name(this.oracleData)).to.be.equal("SushiSwap TWAP")
-                expect(await this.oracleB.name(this.oracleData)).to.be.equal("SushiSwap TWAP")
+                expect(await this.oracleF.name(this.oracleData)).to.be.equal("PolyCityDex TWAP")
+                expect(await this.oracleB.name(this.oracleData)).to.be.equal("PolyCityDex TWAP")
             })
         })
 
@@ -48,7 +48,7 @@ describe("SimpleSLPOracle", function () {
             })
 
             it("should get price even when time since last update is longer than period", async function () {
-                const blockTimestamp = (await this.sushiSwapPair.getReserves())[2]
+                const blockTimestamp = (await this.polyCityDexPair.getReserves())[2]
 
                 await this.oracleF.get(this.oracleData)
                 await this.oracleB.get(this.oracleData)
@@ -59,7 +59,7 @@ describe("SimpleSLPOracle", function () {
                 await this.oracleF.get(this.oracleData)
                 await this.oracleB.get(this.oracleData)
 
-                let info = (await this.oracleF.pairs(this.sushiSwapPair.address)).priceAverage.toString()
+                let info = (await this.oracleF.pairs(this.polyCityDexPair.address)).priceAverage.toString()
                 expect(info).to.be.equal(this.expectedPrice[1].toString())
 
                 await advanceTimeAndBlock(301, ethers)
@@ -72,7 +72,7 @@ describe("SimpleSLPOracle", function () {
 
         describe("get", function () {
             it("should update and get prices within period", async function () {
-                const blockTimestamp = (await this.sushiSwapPair.getReserves())[2]
+                const blockTimestamp = (await this.polyCityDexPair.getReserves())[2]
 
                 await this.oracleF.get(this.oracleData)
                 await this.oracleB.get(this.oracleData)
@@ -85,7 +85,7 @@ describe("SimpleSLPOracle", function () {
                 await this.oracleF.get(this.oracleData)
                 await this.oracleF.get(this.oracleData)
 
-                let info = (await this.oracleF.pairs(this.sushiSwapPair.address)).priceAverage.toString()
+                let info = (await this.oracleF.pairs(this.polyCityDexPair.address)).priceAverage.toString()
 
                 expect(info).to.be.equal(this.expectedPrice[1].toString())
                 expect((await this.oracleF.peek(this.oracleData))[1]).to.be.equal(getBigNumber(1).mul(5).div(10))
@@ -93,15 +93,15 @@ describe("SimpleSLPOracle", function () {
             })
 
             it("should update prices after swap", async function () {
-                const blockTimestamp = (await this.sushiSwapPair.getReserves())[2]
+                const blockTimestamp = (await this.polyCityDexPair.getReserves())[2]
                 await this.oracleF.get(this.oracleData)
                 await advanceTime(301, ethers)
                 await this.oracleF.get(this.oracleData)
 
                 const price0 = (await this.oracleF.peek(this.oracleData))[1]
-                await this.collateral.transfer(this.sushiSwapPair.address, getBigNumber(5))
+                await this.collateral.transfer(this.polyCityDexPair.address, getBigNumber(5))
                 await advanceTime(150, ethers)
-                await this.sushiSwapPair.sync()
+                await this.polyCityDexPair.sync()
                 await advanceTime(150, ethers)
                 await this.oracleF.get(this.oracleData)
                 const price1 = (await this.oracleF.peek(this.oracleData))[1]
@@ -113,8 +113,8 @@ describe("SimpleSLPOracle", function () {
             })
         })
 
-        it("Assigns name to SushiSwap TWAP", async function () {
-            expect(await this.oracleF.name(this.oracleData)).to.equal("SushiSwap TWAP")
+        it("Assigns name to PolyCityDex TWAP", async function () {
+            expect(await this.oracleF.name(this.oracleData)).to.equal("PolyCityDex TWAP")
         })
 
         it("Assigns symbol to S", async function () {

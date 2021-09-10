@@ -1,6 +1,6 @@
-# Kashi Lending
+# Kusho Lending
 
-Platforms like Compound and Aave allow users to deposit assets as collateral and borrow other assets against this. These protocols have attracted billions of dollars, but they suffer from some major limitations. Taking away these limitations could see much larger adoption. BentoBox aims to do just that.
+Platforms like Compound and Aave allow users to deposit assets as collateral and borrow other assets against this. These protocols have attracted billions of dollars, but they suffer from some major limitations. Taking away these limitations could see much larger adoption. AntiqueBox aims to do just that.
 
 We solve these issues by having a platform with:
 

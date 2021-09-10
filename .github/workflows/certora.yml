@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  verify_kashi:
+  verify_kusho:
     runs-on: ubuntu-latest
 
     steps:
@@ -56,8 +56,8 @@ jobs:
           chmod +x spec/scripts/*.sh
           ./spec/scripts/applyHarnesses.sh
 
-      - name: Verify with Certora - kashipair
+      - name: Verify with Certora - kushopair
         run: |
-          spec/scripts/runKashiPair.sh
+          spec/scripts/runKushoPair.sh
         env:
           CERTORAKEY: ${{ secrets.CERTORAKEY }}

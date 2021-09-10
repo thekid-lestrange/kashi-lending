@@ -27,30 +27,30 @@ interface IAggregator {
     function latestAnswer() external view returns (int256 answer);
 }
 
-/// @title xSUSHIOracle
+/// @title xPICHIOracle
 /// @author BoringCrypto
-/// @notice Oracle used for getting the price of xSUSHI based on Chainlink SUSHI price
+/// @notice Oracle used for getting the price of xPICHI based on Chainlink PICHI price
 /// @dev
-contract xSUSHIOracleV1 is IAggregator {
+contract xPICHIOracleV1 is IAggregator {
     using BoringMath for uint256;
 
-    IERC20 public immutable sushi;
-    IERC20 public immutable bar;
-    IAggregator public immutable sushiOracle;
+    IERC20 public immutable pichi;
+    IERC20 public immutable hall;
+    IAggregator public immutable pichiOracle;
 
     constructor(
-        IERC20 sushi_,
-        IERC20 bar_,
-        IAggregator sushiOracle_
+        IERC20 pichi_,
+        IERC20 hall_,
+        IAggregator pichiOracle_
     ) public {
-        sushi = sushi_;
-        bar = bar_;
-        sushiOracle = sushiOracle_;
+        pichi = pichi_;
+        hall = hall_;
+        pichiOracle = pichiOracle_;
     }
 
     // Calculates the lastest exchange rate
-    // Uses sushi rate and xSUSHI conversion
+    // Uses pichi rate and xPICHI conversion
     function latestAnswer() external view override returns (int256) {
-        return int256(uint256(sushiOracle.latestAnswer()).mul(sushi.balanceOf(address(bar))) / bar.totalSupply());
+        return int256(uint256(pichiOracle.latestAnswer()).mul(pichi.balanceOf(address(hall))) / hall.totalSupply());
     }
 }

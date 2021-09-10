@@ -3,11 +3,11 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 import "@boringcrypto/boring-solidity/contracts/interfaces/IERC20.sol";
-import "@sushiswap/bentobox-sdk/contracts/IBentoBoxV1.sol";
+import "@polycity/antiquebox-sdk/contracts/IAntiqueBoxV1.sol";
 import "./IOracle.sol";
 import "./ISwapper.sol";
 
-interface IKashiPair {
+interface IKushoPair {
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
     event LogAccrue(uint256 accruedAmount, uint256 feeFraction, uint64 rate, uint256 utilization);
     event LogAddAsset(address indexed from, address indexed to, uint256 share, uint256 fraction);
@@ -55,7 +55,7 @@ interface IKashiPair {
 
     function balanceOf(address) external view returns (uint256);
 
-    function bentoBox() external view returns (IBentoBoxV1);
+    function antiqueBox() external view returns (IAntiqueBoxV1);
 
     function borrow(address to, uint256 amount) external returns (uint256 part, uint256 share);
 

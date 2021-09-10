@@ -1,1 +1,1 @@
-module.exports = require("@sushiswap/hardhat-framework").config.solcover(require("./settings").solcover)
+module.exports = require("@polycity/hardhat-framework").config.solcover(require("./settings").solcover)

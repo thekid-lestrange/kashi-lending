@@ -1,6 +1,6 @@
 using DummyERC20A as collateralInstance
 using DummyERC20B as assetInstance
-using SimpleBentoBox as bentoBox
+using SimpleAntiqueBox as antiqueBox
 
 methods {
 	balanceOf(address a) returns (uint256) envfree
@@ -21,13 +21,13 @@ methods {
 	isSolvent(address user, bool open) returns (bool) envfree
 	origIsSolvent(address user, bool open, uint256 exchangeRate) returns (bool) envfree
 
-	// Bentobox functions
-	bentoBox.transfer(address token, address from, address to, uint256 share) => DISPATCHER(true)
-	bentoBox.balanceOf(address token, address user) returns (uint256) envfree
-	bentoBox.assumeRatio(address token, uint ratio) envfree
-	bentoBox.toShare(address token, uint256 amount, bool roundUp) returns (uint256) envfree
-	bentoBox.toAmount(address token, uint256 share, bool roundUp) returns (uint256) envfree
-	bentoBox.deposit(address token, address from, address to, uint256 amount, uint256 share) => DISPATCHER(true)
+	// Antiquebox functions
+	antiqueBox.transfer(address token, address from, address to, uint256 share) => DISPATCHER(true)
+	antiqueBox.balanceOf(address token, address user) returns (uint256) envfree
+	antiqueBox.assumeRatio(address token, uint ratio) envfree
+	antiqueBox.toShare(address token, uint256 amount, bool roundUp) returns (uint256) envfree
+	antiqueBox.toAmount(address token, uint256 share, bool roundUp) returns (uint256) envfree
+	antiqueBox.deposit(address token, address from, address to, uint256 amount, uint256 share) => DISPATCHER(true)
 	
 	// Swapper
 	swap(address fromToken, address toToken, address recipient, uint256 amountToMin, uint256 shareFrom) => DISPATCHER(true)
@@ -133,10 +133,10 @@ invariant integrityOfZeroBorrowAssets()
 
 // INVARIANTS implemented as rules
 
-rule totalCollateralLeBentoBoxBalanceOf(method f) { // Le: less than or equal to
+rule totalCollateralLeAntiqueBoxBalanceOf(method f) { // Le: less than or equal to
 	setup();
 
-	require bentoBox.balanceOf(collateralInstance, currentContract) >= totalCollateralShare(); 
+	require antiqueBox.balanceOf(collateralInstance, currentContract) >= totalCollateralShare(); 
 
 	env e;
 	calldataarg args;
@@ -145,13 +145,13 @@ rule totalCollateralLeBentoBoxBalanceOf(method f) { // Le: less than or equal to
 
 	f(e, args);
 
-	assert bentoBox.balanceOf(collateralInstance, currentContract) >= totalCollateralShare(); 
+	assert antiqueBox.balanceOf(collateralInstance, currentContract) >= totalCollateralShare(); 
 }
 
-rule totalAssetElasticLeBentoBoxBalanceOf(method f) { // Le: less than or equal to
+rule totalAssetElasticLeAntiqueBoxBalanceOf(method f) { // Le: less than or equal to
 	setup();
 
-	require bentoBox.balanceOf(assetInstance, currentContract) >= totalAssetElastic();
+	require antiqueBox.balanceOf(assetInstance, currentContract) >= totalAssetElastic();
 
 	env e;
 	calldataarg args;
@@ -160,7 +160,7 @@ rule totalAssetElasticLeBentoBoxBalanceOf(method f) { // Le: less than or equal 
 
 	f(e, args);
 
-	assert bentoBox.balanceOf(assetInstance, currentContract) >= totalAssetElastic(); 
+	assert antiqueBox.balanceOf(assetInstance, currentContract) >= totalAssetElastic(); 
 }
 
 function validState() {
@@ -169,11 +169,11 @@ function validState() {
 	requireInvariant validityOfTotalSupply();
 	requireInvariant integrityOfZeroBorrowAssets();
 
-	// rule totalCollateralLeBentoBoxBalanceOf
-	require bentoBox.balanceOf(collateralInstance, currentContract) >= totalCollateralShare();
+	// rule totalCollateralLeAntiqueBoxBalanceOf
+	require antiqueBox.balanceOf(collateralInstance, currentContract) >= totalCollateralShare();
 
-	// rule totalAssetElasticLeBentoBoxBalanceOf
-	require bentoBox.balanceOf(assetInstance, currentContract) >= totalAssetElastic();
+	// rule totalAssetElasticLeAntiqueBoxBalanceOf
+	require antiqueBox.balanceOf(assetInstance, currentContract) >= totalAssetElastic();
 }
 
 // RULES
@@ -254,25 +254,25 @@ rule integrityOfSkimAddCollateral(address to, uint256 share, address from) {
 	validState();
 
 	// need two different env since we are calling different contracts
-	env eBento;
+	env eAntique;
 	env e;
 
 	uint256 _collateralShare = userCollateralShare(to);
 	uint256 _totalCollateralShare = totalCollateralShare();
 
-	require eBento.msg.sender == e.msg.sender;
-	require eBento.block.number == e.block.number;
-	require eBento.block.timestamp == e.block.timestamp;
+	require eAntique.msg.sender == e.msg.sender;
+	require eAntique.block.number == e.block.number;
+	require eAntique.block.timestamp == e.block.timestamp;
 
 	require e.msg.value == 0;
-	require e.msg.sender != currentContract && e.msg.sender != bentoBox;
+	require e.msg.sender != currentContract && e.msg.sender != antiqueBox;
 	require from == e.msg.sender;
 
-	require  bentoBox.balanceOf(collateralInstance, currentContract) ==  _totalCollateralShare; 
+	require  antiqueBox.balanceOf(collateralInstance, currentContract) ==  _totalCollateralShare; 
 	require  _collateralShare <= _totalCollateralShare;
 
-	// transfer shares to lendingPair account in BentoBox 
-	sinvoke bentoBox.transfer(eBento, collateralInstance, from, currentContract, share);
+	// transfer shares to lendingPair account in AntiqueBox 
+	sinvoke antiqueBox.transfer(eAntique, collateralInstance, from, currentContract, share);
 
 	// check if add collateral is successful
 	bool skim = true;
@@ -368,20 +368,20 @@ rule integrityOfLiquidate() {
 	
 	env e;
 
-	uint256 collateralBalanceBefore = bentoBox.balanceOf(collateralInstance, currentContract);
-	uint256 assetBalanceBefore = bentoBox.balanceOf(assetInstance, currentContract);
+	uint256 collateralBalanceBefore = antiqueBox.balanceOf(collateralInstance, currentContract);
+	uint256 assetBalanceBefore = antiqueBox.balanceOf(assetInstance, currentContract);
 
-	// when there is excess balance in bentobox then the fee paid on the extra can be more than the asset gained from liquidation
+	// when there is excess balance in antiquebox then the fee paid on the extra can be more than the asset gained from liquidation
 	require totalAssetElastic() == assetBalanceBefore;
 	require e.msg.sender != currentContract;
 
-	sinvoke bentoBox.assumeRatio(collateralInstance, 2);
+	sinvoke antiqueBox.assumeRatio(collateralInstance, 2);
 
 	calldataarg args;
 	liquidate(e, args);
 
-	uint256 collateralBalanceAfter = bentoBox.balanceOf(collateralInstance, currentContract);
-	uint256 assetBalanceAfter = bentoBox.balanceOf(assetInstance, currentContract);
+	uint256 collateralBalanceAfter = antiqueBox.balanceOf(collateralInstance, currentContract);
+	uint256 assetBalanceAfter = antiqueBox.balanceOf(assetInstance, currentContract);
 
 	assert (assetBalanceAfter >= assetBalanceBefore,
 			"asset balance decreased");

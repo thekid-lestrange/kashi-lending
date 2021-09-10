@@ -1,6 +1,6 @@
 using DummyERC20A as collateralInstance
 using DummyERC20B as assetInstance
-using SimpleBentoBox as bentoBox
+using SimpleAntiqueBox as antiqueBox
 
 methods {
 	balanceOf(address a) returns (uint256) envfree
@@ -20,12 +20,12 @@ methods {
 	feeTo() returns (address) envfree
 	isSolvent(address user, bool open) returns (bool) envfree
 
-	// Bentobox functions
-	bentoBox.transfer(address token, address from, address to, uint256 share) => DISPATCHER(true)
-	bentoBox.balanceOf(address token, address user) returns (uint256) envfree
-	bentoBox.toShare(address token, uint256 amount, bool roundUp) returns (uint256) envfree
-	bentoBox.toAmount(address token, uint256 share, bool roundUp) returns (uint256) envfree
-	bentoBox.deposit(address token, address from, address to, uint256 amount, uint256 share) => DISPATCHER(true)
+	// Antiquebox functions
+	antiqueBox.transfer(address token, address from, address to, uint256 share) => DISPATCHER(true)
+	antiqueBox.balanceOf(address token, address user) returns (uint256) envfree
+	antiqueBox.toShare(address token, uint256 amount, bool roundUp) returns (uint256) envfree
+	antiqueBox.toAmount(address token, uint256 share, bool roundUp) returns (uint256) envfree
+	antiqueBox.deposit(address token, address from, address to, uint256 amount, uint256 share) => DISPATCHER(true)
 	
 	// Swapper
 	swap(address fromToken, address toToken, address recipient, uint256 amountToMin, uint256 shareFrom) => DISPATCHER(true)
@@ -68,11 +68,11 @@ function validState() {
 	require totalBorrowElastic() >= totalBorrowBase() && 
 	((totalBorrowElastic() == 0) <=> (totalBorrowBase() == 0));
 
-	// rule totalCollateralLeBentoBoxBalanceOf
-	require bentoBox.balanceOf(collateralInstance, currentContract) >= totalCollateralShare();
+	// rule totalCollateralLeAntiqueBoxBalanceOf
+	require antiqueBox.balanceOf(collateralInstance, currentContract) >= totalCollateralShare();
 
-	// rule totalAssetElasticLeBentoBoxBalanceOf
-	require bentoBox.balanceOf(assetInstance, currentContract) >= totalAssetElastic();
+	// rule totalAssetElasticLeAntiqueBoxBalanceOf
+	require antiqueBox.balanceOf(assetInstance, currentContract) >= totalAssetElastic();
 }
 
 // RULES that timeout in general settings, can be proven only on simplified version
