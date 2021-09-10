@@ -235,7 +235,8 @@ contract PolyCityDexMultiSwapper {
             path[3] = address(tokenOut);
         }
         path[0] = address(tokenIn);
-        (uint256 amountIn, ) = antiqueBox.withdraw(tokenIn, address(this), UniswapV2Library.pairFor(factory, path[0], path[1], pairCodeHash), 0, shareIn);
+        (uint256 amountIn, ) =
+            antiqueBox.withdraw(tokenIn, address(this), UniswapV2Library.pairFor(factory, path[0], path[1], pairCodeHash), 0, shareIn);
         uint256 amount = _swapExactTokensForTokens(amountIn, amountMinOut, path, address(antiqueBox));
         (, uint256 share) = antiqueBox.deposit(tokenOut, address(antiqueBox), to, amount, 0);
         return baseShare.add(share);
