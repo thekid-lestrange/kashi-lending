@@ -1,5 +1,9 @@
+require("dotenv")
 module.exports = {
     hardhat: {
+        etherscan: {
+            apiKey: 'CXXHJCUZBI682JIYCHVUCQGKG8S7NBK73K',
+        },
         solidity: {
             overrides: {
                 "contracts/KushoPair.sol": {

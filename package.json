@@ -7,12 +7,13 @@
         "coverage": "hardhat coverage"
     },
     "devDependencies": {
-        "@polycity/hardhat-framework": "1.0.1"
+        "@polycity/hardhat-framework": "^1.0.1"
     },
     "dependencies": {
         "@boringcrypto/boring-solidity": "boringcrypto/BoringSolidity#371a01c11465eb1c881193c60a53c0bf15ee8a19",
         "@polycity/antiquebox-sdk": "1.0.2",
         "@polycity/core": "2.0.0-canary.3",
-        "hardhat-deploy-ethers": "^0.3.0-beta.7"
+        "hardhat-deploy-ethers": "^0.3.0-beta.7",
+        "@nomiclabs/hardhat-etherscan": "^2.1.6"
     }
 }

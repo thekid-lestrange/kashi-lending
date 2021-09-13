@@ -12,7 +12,7 @@ import "../libraries/FixedPoint.sol";
 
 // adapted from https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleSlidingWindowOracle.sol
 
-contract SimpleSLPTWAP0Oracle is IOracle {
+contract SimplePolyLpTWAP0Oracle is IOracle {
     using FixedPoint for *;
     using BoringMath for uint256;
     uint256 public constant PERIOD = 5 minutes;

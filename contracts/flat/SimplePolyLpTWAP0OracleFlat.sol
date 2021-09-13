@@ -332,13 +332,13 @@ library FixedPoint {
     }
 }
 
-// File contracts/oracles/SimpleSLPTWAP0Oracle.sol
+// File contracts/oracles/SimplePolyLpTWAP0Oracle.sol
 // License-Identifier: AGPL-3.0-only
 // Using the same Copyleft License as in the original Repository
 
 // adapted from https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleSlidingWindowOracle.sol
 
-contract SimpleSLPTWAP0OracleV1 is IOracle {
+contract SimplePolyLpTWAP0OracleV1 is IOracle {
     using FixedPoint for *;
     using BoringMath for uint256;
     uint256 public constant PERIOD = 5 minutes;

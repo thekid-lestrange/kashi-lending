@@ -1,20 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
-
-// Kusho Lending Medium Risk
-
-//  __  __             __    __      _____                  __ __
-// |  |/  .---.-.-----|  |--|__|    |     |_.-----.-----.--|  |__.-----.-----.
-// |     <|  _  |__ --|     |  |    |       |  -__|     |  _  |  |     |  _  |
-// |__|\__|___._|_____|__|__|__|    |_______|_____|__|__|_____|__|__|__|___  |
-//                                                                     |_____|
-
-// Copyright (c) 2021 BoringCrypto - All rights reserved
-// Twitter: @Boring_Crypto
-
-// Special thanks to:
-// @0xKeno - for all his invaluable contributions
-// @burger_crypto - for the idea of trying to let the LPs benefit from liquidations
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";

@@ -29,9 +29,9 @@ describe("CompositeOracle", function () {
             await this.pairPichiEth.mint(this.alice.address)
 
             if (this.ethToken.address == (await this.pairPichiEth.token0())) {
-                await cmd.deploy("oraclePichiEth", "SimpleSLPTWAP0Oracle")
+                await cmd.deploy("oraclePichiEth", "SimplePolyLpTWAP0Oracle")
             } else {
-                await cmd.deploy("oraclePichiEth", "SimpleSLPTWAP1Oracle")
+                await cmd.deploy("oraclePichiEth", "SimplePolyLpTWAP1Oracle")
             }
             this.oracleDataA = await this.oraclePichiEth.getDataParameter(this.pairPichiEth.address)
 
@@ -47,9 +47,9 @@ describe("CompositeOracle", function () {
             await this.pairDaiEth.mint(this.alice.address)
 
             if (this.daiToken.address == (await this.pairDaiEth.token0())) {
-                await cmd.deploy("oracleDaiEth", "SimpleSLPTWAP0Oracle")
+                await cmd.deploy("oracleDaiEth", "SimplePolyLpTWAP0Oracle")
             } else {
-                await cmd.deploy("oracleDaiEth", "SimpleSLPTWAP1Oracle")
+                await cmd.deploy("oracleDaiEth", "SimplePolyLpTWAP1Oracle")
             }
             this.oracleDataB = await this.oracleDaiEth.getDataParameter(this.pairDaiEth.address)
             await cmd.deploy("compositeOracle", "CompositeOracle")
